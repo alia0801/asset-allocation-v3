@@ -91,14 +91,12 @@ def get_ann_data_corr(db_name,today,nnnn,etf):
     corr_pd1 = df.corr()
     return df_reward_std,corr_pd1
 
-def cluser_by_corr(list_etf,db_name='my_etf',number=3,y=2018,expect_reward=0.08,nnnn=3):
-    # (y,expect_reward,nnnn) = (2018,0.08,3)
-    # starttime = datetime.datetime.now()
-    # db_name = 'my_etf'
-    # list_etf = ['TW_etf']
+def cluser_by_corr(list_etf,db_name,number,y,month,nnnn=1):
+
     etf = get_etfs(db_name,list_etf)
     real_today = datetime.date.today()
-    today = datetime.date(y-1,12,31)
+    # today = datetime.date(y-1,12,31)
+    today = datetime.date(y,month,1) # date end
     if (real_today-today).days > 0:
         df_reward_std,corr_pd1 = get_ann_data_corr(db_name,today,nnnn,etf)
         etf_target = do_etf_obj(etf,df_reward_std)
@@ -140,9 +138,9 @@ def cluser_by_corr(list_etf,db_name='my_etf',number=3,y=2018,expect_reward=0.08,
 if __name__ == '__main__':
     db_name = 'my_etf'
     list_etf = ['TW_etf']
-    (y,expect_reward,nnnn) = (2018,0.08,3)
+    (y,month,nnnn) = (2018,6,1)
     number=3
-    med_id,med_name,df = cluser_by_corr(list_etf,db_name,number,y,expect_reward,nnnn)
+    med_id,med_name,df = cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
     print(med_id)
     print(med_name)
     print(df)

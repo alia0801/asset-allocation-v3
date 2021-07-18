@@ -6,6 +6,7 @@ import time
 import numpy as np
 import random
 import math
+from numpy.lib.function_base import append
 import pandas as pd 
 import generate_input_data
 import rnn
@@ -118,10 +119,10 @@ def draw_target_2(weights,number,groups,every_close_finalday):
 
 # %%
 # 產生第一個組合(分群、預測、分配權重、選代表)
-def choose_target(lstm_filepath,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
+def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -180,10 +181,10 @@ def choose_target(lstm_filepath,db_name,list_etf,y,expect_reward,nnnn,month,mark
 
 # %%
 # 動態調整組合(根據輸入的組合調權重)
-def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
+def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -246,14 +247,16 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,expect_reward,nnnn,mo
 # 記憶體會爆掉 所以1年的模擬要分2次跑
 if __name__ == '__main__':
     start = time.time()
+    (y,nnnn,month) = (2018,1,6) # 2018/1/1~2018/12/31
 
     db_name = 'my_etf'
-    # list_etf = ['TW_etf']
+    
     list_etf = ['US_etf']
-    (y,expect_reward,nnnn,month) = (2018,0.08,1,6) # 2018/1/1~2018/12/31
-    # market_etf = '006204.TW'
     market_etf = 'SPY'
     market = 'us'
+    # list_etf = ['TW_etf']
+    # market_etf = '006204.TW'
+    # market = 'tw'
 
     # cluster = 'type'
     cluster = 'corr'
@@ -283,8 +286,7 @@ if __name__ == '__main__':
             first_month=(first_month+6)-12
         else:
             first_month+=6
-        # y = to_do[i][0]
-        # month = to_do[i][1]
+
         print(str(first_y)+'/'+str(first_month))
 
         y = first_y
@@ -292,7 +294,7 @@ if __name__ == '__main__':
 
         lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
         os.mkdir(lstm_filepath)
-        ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,expect_reward,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+        ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
         ans = [ans_list[0]]
         print(ans)
 
@@ -313,7 +315,7 @@ if __name__ == '__main__':
                 y+=1
                 month=1
 
-            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
             # ans_new_list.append(ans_new[0])
             print(ans_new)
             tmp = [y,month,ans_new[0][0],ans_new[0][1]]
@@ -333,7 +335,7 @@ if __name__ == '__main__':
 
 ############################# 第2部分 #########################################
 
-    # 設定初始年/月，手動輸入第1部分跑的結果(這邊之後會改成直接讀檔)，繼續跑動態平衡，每次跑完都會存檔
+    # 設定初始年/月，讀入第1部分跑的結果，繼續跑動態平衡，每次跑完都會存檔
 
     first_y = 2018
     first_month = 7
@@ -346,30 +348,35 @@ if __name__ == '__main__':
             first_month=(first_month+6)-12
         else:
             first_month+=6
-        # y = to_do[i][0]
-        # month = to_do[i][1]
+
         print(str(first_y)+'/'+str(first_month))
         y = first_y
         month = first_month
         lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
-        # os.mkdir(lstm_filepath)
-        # ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,expect_reward,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
-        
+         
         ################################## 把這裡改成第一部分輸出的結果 ######################################
 
-        ans_list = [['GUSH DPST LABD SOXS JDST', '0.0 0.24673 0.48312 0.09517 0.17498']] #第一個組合
+        df = pd.read_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv')
+
+        # ans_list = [['GUSH DPST LABD SOXS JDST', '0.0 0.24673 0.48312 0.09517 0.17498']] #第一個組合
+        ans_list = [[df['names'][0],df['weights'][0]]]
         ans = [ans_list[0]]
         print(ans)
 
-        # 第1部分的所有結果
-        df_list = [[2019, 1, 'GUSH DPST LABD SOXS JDST', '0.0 0.24673 0.48312 0.09517 0.17498'],
-         [2019, 2, 'GUSH DPST LABD SOXS JDST', '0.09345 0.09345 0.32148 0.49162 0.0'],
-          [2019, 3, 'GUSH DPST LABD SOXS JDST', '0.08955 0.5933 0.22761 0.0 0.08955'],
-         [2019, 4, 'GUSH DPST LABD SOXS JDST', '0.09188 0.15998 0.2384 0.50974 0.0']]
-        
+        # # 第1部分的所有結果
+        # df_list = [[2019, 1, 'GUSH DPST LABD SOXS JDST', '0.0 0.24673 0.48312 0.09517 0.17498'],
+        #  [2019, 2, 'GUSH DPST LABD SOXS JDST', '0.09345 0.09345 0.32148 0.49162 0.0'],
+        #   [2019, 3, 'GUSH DPST LABD SOXS JDST', '0.08955 0.5933 0.22761 0.0 0.08955'],
+        #  [2019, 4, 'GUSH DPST LABD SOXS JDST', '0.09188 0.15998 0.2384 0.50974 0.0']]
+        df_list = []
+        for i in range(len(df)):
+            tmp = [ int(df['year'][i]), int(df['month'][i]), df['names'][i], df['weights'][i] ] 
+            df_list.append(tmp)
+        print(df_list)
+
         # 第1部分跑的最後一個年/月
-        y=2019
-        month = 4
+        y= int(df['year'][len(df)-1])
+        month = int(df['month'][len(df)-1])
         
         ####################################################################################################
         
@@ -387,7 +394,7 @@ if __name__ == '__main__':
                 y+=1
                 month=1
             print(y,month)
-            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
             # ans_new_list.append(ans_new[0])
             print(ans_new)
             tmp = [y,month,ans_new[0][0],ans_new[0][1]]
@@ -401,46 +408,3 @@ if __name__ == '__main__':
         df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
 
 # %%
-
-        
-    
-    # # # [2018,9],[2018,11],[2018,12],[2019,4],[2019,12],
-    # # to_do =[[2019,2],[2019,3],[2020,4],[2020,5],[2020,10],[2020,12]]
-    # # count = 0
-    # # y = 2020
-    # # month = 10
-    # # # big_list = []
-    # # # while count < 3:
-    # # for i in range(len(to_do)):
-    # #     # count += 1
-    # #     # if month==12:
-    # #     #     y+=1
-    # #     #     month=1
-    # #     # else:
-    # #     #     month+=1
-    # #     y = to_do[i][0]
-    # #     month = to_do[i][1]
-    # #     print(str(y)+'/'+str(month))
-    # #     try:
-    # #         ans_list = choose_target(db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
-    # #     except:
-    # #         print('error')
-    # #         continue
-    # #     df_list = []
-    # #     for ans in ans_list:
-    # #         df_list.append([str(y),str(month),ans[0],ans[1]])
-    # #         # big_list.append([str(y),str(month),ans[0],ans[1]])
-    # #     df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
-    # #     df.to_csv(filepath+'TW ans-'+str(y)+'-'+str(month)+'.csv',index=False)
-    # # big_df = pd.DataFrame(big_list,columns=['year','month','names','weights'])
-    # # big_df.to_csv(filepath+'TW ans-all.csv',index=False)
-
-    # # y = 2020
-    # # month = 12
-    # # ans = choose_target(db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
-    # # print('answers')
-    # # for i in range(len(ans)):
-    # #     print(ans[i]) 
-
-    # end = time.time()
-    # print(end-start)

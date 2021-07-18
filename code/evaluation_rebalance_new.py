@@ -47,7 +47,7 @@ for a in range(len(v1)):
 # %%
 
 # nnnn=1
-input_month_total=10000
+# input_month_total=10000
 # first_input_total=150000
 day_of_month = [ 31,28,31, 30,31,30, 31,31,30, 31,30,31]
 
@@ -62,7 +62,7 @@ def get_a_etf(reward,y,length):
         return None    
 
 
-def get_rewards(y,nnnn,choose,weight,first_input_total,mode=3):
+def get_rewards(y,nnnn,choose,weight,first_input_total,input_month_total,mode=3):
     # print(choose,weight)
     if y+nnnn>today.year:
         print('y+nnnn too big')
@@ -107,7 +107,7 @@ def get_rewards(y,nnnn,choose,weight,first_input_total,mode=3):
         print('not create')
         return [-100,-100,100,100,[],[]]
 
-    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total)
+    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total,input_month_total)
     # print(sum_money)
 
     input_money = [first_input_total]
@@ -146,7 +146,7 @@ def get_rewards(y,nnnn,choose,weight,first_input_total,mode=3):
 
 # %%
 
-def train_choose(y,month,choose,weight,first_input_total,mode=3):
+def train_choose(y,month,choose,weight,first_input_total,input_month_total,mode=3):
     print(choose,weight)
     nnnn = 1
     if y>today.year:
@@ -191,7 +191,7 @@ def train_choose(y,month,choose,weight,first_input_total,mode=3):
         print('not create')
         return [-100,-100,100,100,[],[]]
 
-    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total)
+    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total,input_month_total)
     # print(sum_money)
     # print(len(ratios))
     # print(len(df2))
@@ -244,7 +244,7 @@ def train_choose(y,month,choose,weight,first_input_total,mode=3):
     return [reward,annual_reward,v1_std,mdd,sum_money,input_money] # ,success_ratio,success
 
 # %%
-def test_choose(y,month,choose,weight,first_input_total,true_first_in,mode=3):
+def test_choose(y,month,choose,weight,first_input_total,true_first_in,input_month_total,mode=3):
     print(choose,weight)
     nnnn = 1/12
     if y+nnnn>today.year:
@@ -292,7 +292,7 @@ def test_choose(y,month,choose,weight,first_input_total,true_first_in,mode=3):
         print('not create')
         return [-100,-100,100,100,[],[]]
 
-    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total)
+    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total,input_month_total)
     # print(sum_money)
     # print(len(ratios))
     # print(len(df2))
@@ -352,7 +352,7 @@ def test_choose(y,month,choose,weight,first_input_total,true_first_in,mode=3):
     return [reward,annual_reward,v1_std,mdd,sum_money[:iiiii+1],input_money[:iiiii+1]] # ,success_ratio,success
 
 # %%
-def test_choose_nochange(y,month,nnn_month,choose,weight,first_input_total,mode=3):
+def test_choose_nochange(y,month,nnn_month,choose,weight,first_input_total,input_month_total,mode=3):
     print(choose,weight)
     nnnn = nnn_month/12
     if y+nnnn>today.year:
@@ -397,7 +397,7 @@ def test_choose_nochange(y,month,nnn_month,choose,weight,first_input_total,mode=
         print('not create')
         return [-100,-100,100,100,[],[]]
 
-    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total)
+    sum_money,ratios = money_sim(choose,weight,df2,start_date,mode,first_input_total,input_month_total)
     # print(sum_money)
     # print(len(ratios))
     # print(len(df2))
@@ -501,7 +501,7 @@ def cal_mdd(choose,weight,df2,ratios):
 
 # %%
 
-def money_sim(choose,weight,df2,start_date,mode,first_input_total):
+def money_sim(choose,weight,df2,start_date,mode,first_input_total,input_month_total):
     # choose = []
     # for a in range(len(choose_obj)):
     #     choose.append(choose_obj[a])

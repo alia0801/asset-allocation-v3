@@ -119,10 +119,10 @@ def draw_target_2(weights,number,groups,every_close_finalday):
 
 # %%
 # 產生第一個組合(分群、預測、分配權重、選代表)
-def choose_target(filepath,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,predict_type):
+def choose_target(filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -187,10 +187,10 @@ def choose_target(filepath,db_name,list_etf,y,expect_reward,nnnn,month,market_et
 
 # %%
 # 動態調整組合(根據輸入的組合調權重)
-def dynamic_target(filepath,groups,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,predict_type):
+def dynamic_target(filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     market_etf = 'SPY'
     market = 'us'
 
-    (y,expect_reward,nnnn,month) = (2018,0.08,1,6) # 2018/1/1~2018/12/31
+    (y,nnnn,month) = (2018,1,6) # 2018/1/1~2018/12/31
 
     # cluster = 'type'
     cluster = 'corr'
@@ -308,7 +308,7 @@ if __name__ == '__main__':
 
         os.mkdir(fig_filepath+str(first_y)+'-'+str(first_month)+'/')
         try:
-            ans_list = choose_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',db_name,list_etf,first_y,expect_reward,nnnn,first_month,market_etf,number,cluster,predict_type)
+            ans_list = choose_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,predict_type)
         except:
             print('error')
             continue
@@ -333,7 +333,7 @@ if __name__ == '__main__':
                     y+=1
                     month=1
 
-                ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,predict_type)
+                ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type)
                 # ans_new_list.append(ans_new[0])
                 print(ans_new)
                 tmp = [y,month,ans_new[0][0],ans_new[0][1]]

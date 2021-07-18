@@ -42,7 +42,7 @@ class Ans_comb:
         # print('success_stat',self.success_stat)   
 
 # %%
-
+colors = ['green','black','orange','purple','pink','yellow','blue','gray','yellowgreen']
 tw50 = ['0050.TW','1.0']
 twii = ['006204.TW','1.0']
 spy = ['SPY','1.0']
@@ -54,7 +54,7 @@ mr_market_classic = ['ITOT VEU VNQ AGG','0.36 0.18 0.06 0.4']
 # evaluation_value_list = ['reward','annual_reward','v1_std','mdd','success_ratio','success']
 # %%
 # train 約y-1/month/1 ~ y/month/1(共252日)
-def train_evaluation(y,month,ans,mode,first_input_total):
+def train_evaluation(y,month,ans,mode,first_input_total,input_month_total):
     
     # y_train = y-nnnn
     nnnn = 1
@@ -69,7 +69,7 @@ def train_evaluation(y,month,ans,mode,first_input_total):
         for i in range(len(weight)):
             weight[i] = float(weight[i])
     
-        evaluation_value = evaluation_rebalance_new.train_choose(y_train,month,choose_name,weight,first_input_total,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
+        evaluation_value = evaluation_rebalance_new.train_choose(y_train,month,choose_name,weight,first_input_total,input_month_total,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
         if evaluation_value is None:
             continue
         
@@ -134,7 +134,7 @@ def train_evaluation(y,month,ans,mode,first_input_total):
 
 # %%
 # test y/month/1 ~ 約y/month+1/1(共21日)-->先改看1年績效
-def test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month):
+def test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month,input_month_total):
     nnnn = 1
     y_test = y
     for a in range(len(gotest_candidate)):
@@ -144,9 +144,9 @@ def test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_fir
         weight = tmp.the_weight
 
         if nochange ==0:
-            evaluation_value = evaluation_rebalance_new.test_choose(y_test,month,choose_name,weight,first_input_total,true_first_in,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
+            evaluation_value = evaluation_rebalance_new.test_choose(y_test,month,choose_name,weight,first_input_total,true_first_in,input_month_total,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
         else:
-            evaluation_value = evaluation_rebalance_new.test_choose_nochange(y_test,month,nnn_month,choose_name,weight,first_input_total,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
+            evaluation_value = evaluation_rebalance_new.test_choose_nochange(y_test,month,nnn_month,choose_name,weight,first_input_total,input_month_total,mode) # reward,annual_reward,v1_std,mdd,success_ratio,success
                                                         # test_choose_nochange(y,month,nnn_month,choose,weight,first_input_total,mode=3)
         # success_ratio,success,stat_list,stat = evaluation_rebalance.slidwindow(y_test,nnnn,choose_name,weight,expect_reward,mode)
         # evaluation_value.append(success_ratio)
@@ -401,8 +401,8 @@ def run_once_money_sim_market(ans,ans_new,market,first_input_total,y,month,use=1
         ans_market = [ans]
     # print(ans_market)
     nochange = 1
-    comb_list,gotest_candidate = train_evaluation(y,month,ans_market,mode,first_input_total)
-    gotest_candidate,final_ans_candidate,final_comb_market = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month)
+    comb_list,gotest_candidate = train_evaluation(y,month,ans_market,mode,first_input_total,input_month_total)
+    gotest_candidate,final_ans_candidate,final_comb_market = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month,input_month_total)
                                                             # test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month)
     return final_comb_market
 
@@ -414,14 +414,14 @@ def run_once_money_sim(ans,ans_new,market,first_input_total,y,month,use=1,mode=4
 
     # 投組第一次選出
     nochange = 0
-    comb_list,gotest_candidate = train_evaluation(y,month,ans,mode,first_input_total)
-    gotest_candidate,final_ans_candidate,final_comb = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month)
+    comb_list,gotest_candidate = train_evaluation(y,month,ans,mode,first_input_total,input_month_total)
+    gotest_candidate,final_ans_candidate,final_comb = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month,input_month_total)
     input_money_record = [final_comb[0].input_money]
     sum_money_record = [final_comb[0].test_sum_money]
     
     # 動態平衡
     for i in range(len(ans_new)):
-        true_first_in += 10000
+        true_first_in += input_month_total
         first_input_total = final_comb[0].test_sum_money[-1]+10000
         if month!=12:
             month +=1
@@ -429,8 +429,8 @@ def run_once_money_sim(ans,ans_new,market,first_input_total,y,month,use=1,mode=4
             y+=1
             month=1
 
-        comb_list,gotest_candidate = train_evaluation(y,month,[ans_new[i]],mode,first_input_total)
-        gotest_candidate,final_ans_candidate,final_comb = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month)
+        comb_list,gotest_candidate = train_evaluation(y,month,[ans_new[i]],mode,first_input_total,input_month_total)
+        gotest_candidate,final_ans_candidate,final_comb = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,true_first_in,nochange,nnn_month,input_month_total)
         input_money_record.append(final_comb[0].input_money)
         sum_money_record.append(final_comb[0].test_sum_money)
         # print()
@@ -460,14 +460,14 @@ def calculate_combs(y,month,market,first_input_total,ans,ans_new):
     compared_combs.append(final_comb_market)
 
     if market=='us':
-        labels = ['comb','market','green horn','mr.market']
+        labels = ['Market','Green Horn','Mr.Market']
         exist_comb = [green_horn_comb,mr_market_classic]
         for comb in exist_comb:
             final_comb_exist = run_once_money_sim_market(comb,ans_new,'other',first_input_total,y,month,use=1,mode=4)
             compared_combs.append(final_comb_exist)
 
     elif market=='tw':
-        labels = ['comb','market','black swan','grow-yuanta']
+        labels = ['Market','Black Swan','grow-Yuanta']
         exist_comb = [black_swan,grow_yuanta]
         for comb in exist_comb:
             final_comb_exist = run_once_money_sim_market(comb,ans_new,'other',first_input_total,y,month,use=1,mode=4)
@@ -477,34 +477,29 @@ def calculate_combs(y,month,market,first_input_total,ans,ans_new):
 
 
 # %%
-# def plot_money_sim(filepath,y,month,market,first_input_total,ans,ans_new):
-def plot_money_sim(filepath,final_input_money,final_sum_money,compared_combs,labels):
+
+def plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_combs,labels):
     
-    # final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
+    fig_y_min = 50000
+    fig_y_max = 500000
 
-    fig_y_min = 60000
-    fig_y_max = 600000
+    plt.plot(final_input_money, color='red',label='input')
 
-    reward = round((final_sum_money[-1]-final_input_money[-1])/final_input_money[-1],5)
-    txt_comb = 'comb reward: '+str(reward)
-    plt.plot(final_input_money, color='r',label='input')
-    plt.plot(final_sum_money, color='b',label='comb')
-    plt.text(0,fig_y_max-25000,txt_comb)
-
-    colors = ['g','black','orange']
     for i in range(len(compared_combs)):
         comb = compared_combs[i]
-        reward = comb[0].test_reward
-        txt = labels[i+1] + ' reward: '+str(reward)
-        plt.plot(comb[0].test_sum_money, color=colors[i],label=labels[i+1])
-        plt.text(0,fig_y_max-25000*(i+2),txt)
+        plt.plot(comb[0].test_sum_money, color=colors[i],label=labels[i])
+
+    for i in range(len(record_comb_moneysim)):
+        final_sum_money = record_comb_moneysim[i]
+        plt.plot(final_sum_money, color=colors[i+3],label=labels[i+3])
 
     plt.ylim([fig_y_min,fig_y_max])
-    # plt.legend(loc='lower right')
-    plt.savefig(filepath+'compare2marketnew-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    plt.legend(loc='upper left')
+    plt.savefig(filepath+'money sim-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
     # plt.show()
     plt.clf()
     plt.close()
+
 
 # %%
 def cal_ann_reward_list(input_money,sum_money):
@@ -512,7 +507,7 @@ def cal_ann_reward_list(input_money,sum_money):
     reward_list = [0]
     input = input_money[0]
     count_month = 1
-    for i in range(len(input_money)):
+    for i in range(len(sum_money)):
         if input_money[i]>input:
             r = (sum_money[i-1]-input)/input
             input = input_money[i]
@@ -520,7 +515,7 @@ def cal_ann_reward_list(input_money,sum_money):
             ann_r = math.pow( (1+r), 1/nnnn )-1
             reward_list.append(ann_r)
             count_month += 1
-    
+    # print(len(sum_money),i)
     r = (sum_money[i-1]-input)/input
     input = input_money[i]
     nnnn = count_month/12
@@ -530,71 +525,72 @@ def cal_ann_reward_list(input_money,sum_money):
     return reward_list
 
 # %%
-def plot_ann_reward(filepath,final_input_money,final_sum_money,compared_combs,labels):
+def plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_combs,labels):
 
     fig_y_min = -1
     fig_y_max = 1.5
 
-    reward_list_comb = cal_ann_reward_list(final_input_money,final_sum_money)
-
-    # plt.plot(final_input_money, color='r',label='input')
-    plt.plot(reward_list_comb, color='b',label='comb')
-    for j in range(1,len(reward_list_comb)):
-        txt = str(round(reward_list_comb[j],5))
-        # plt.text(j-0.25,reward_list_comb[j]+0.005,txt)
-
-    colors = ['g','black','orange']
     for i in range(len(compared_combs)):
         comb = compared_combs[i]
         reward_list = cal_ann_reward_list(final_input_money,comb[0].test_sum_money)
-        plt.plot(reward_list, color=colors[i],label=labels[i+1])
-        for j in range(1,len(reward_list)):
-            txt = str(round(reward_list[j],5))
-            # plt.text(j-0.25,reward_list[j]+0.005,txt)
+        plt.plot(reward_list, color=colors[i],label=labels[i])
+
+    for i in range(len(record_comb_moneysim)):
+        final_sum_money = record_comb_moneysim[i]
+        reward_list = cal_ann_reward_list(final_input_money,final_sum_money)
+        plt.plot(reward_list, color=colors[i+3],label=labels[i+3])
 
     plt.ylim([fig_y_min,fig_y_max])
-    # plt.legend(loc='lower left')
-    plt.savefig(filepath+'ann_reward-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    plt.legend()
+    plt.savefig(filepath+'ann reward-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
     # plt.show()
     plt.clf()
     plt.close()
 
 # %%
-# def compare_plot_3D(filepath,market,y,month,ans_list,legends,comb_values,ans_new,first_input_total,mode=4,use=1):
+
 def compare_plot_3D(filepath,comb_values,legends,compared_combs):
-    # true_first_in = first_input_total
-    rewards = [comb_values[0]]
-    risks = [comb_values[2]]
-    mdds = [comb_values[3]]
+    
+    rewards = []
+    risks = []
+    mdds = []
     for comb in compared_combs:
         rewards.append(comb[0].test_reward)
         risks.append(comb[0].test_risk)
         mdds.append(comb[0].test_mdd)
+    for value in comb_values:
+        rewards.append(value[0])
+        risks.append(value[2])
+        mdds.append(value[3])
 
-    # print(rewards,risks,mdds)
-    color = ['b','g','black','orange','purple','r']
-    if len(compared_combs)>0:
-        p=[]
-        ax = plt.subplot(projection='3d')
-        for i in range(len(rewards)):
-            ttt_fig = ax.scatter([risks[i]],[mdds[i]],[rewards[i]],  marker='o', s=40 ,c=color[i])
-            p.append(ttt_fig)
-        ax.set_zlabel('reward') 
-        ax.set_ylabel('mdd')
-        ax.set_xlabel('risk')
-        ax.legend(p,legends)
-        plt.savefig(filepath+'3Dfig-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
-        # plt.show()
-        plt.clf()
+    print(rewards,risks,mdds)
+
+    p=[]
+    ax = plt.subplot(projection='3d')
+    for i in range(len(rewards)):
+        ttt_fig = ax.scatter([risks[i]],[mdds[i]],[rewards[i]],  marker='o', s=40 ,c=colors[i])
+        p.append(ttt_fig)
+    ax.set_zlabel('reward') 
+    ax.set_ylabel('mdd')
+    ax.set_xlabel('risk')
+    ax.legend(p,legends)
+    plt.savefig(filepath+'3Dfig-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    # plt.show()
+    plt.clf()
+    plt.close()
+
     return rewards,risks,mdds
 
 # %%
-# def plot_3D(filepath,y,month,market,ans,ans_new,first_input_total,mode=4,use=1):
-def plot_3D(filepath,final_input_money,final_sum_money,compared_combs,labels):
-    comb_values = calculate_values(final_input_money,final_sum_money)
+def plot_3D(filepath,final_input_money,record_comb_moneysim,compared_combs,labels):
+    
+    comb_values = []
+    for final_sum_money in record_comb_moneysim:
+        value = calculate_values(final_input_money,final_sum_money)
+        comb_values.append(value)
     legends = labels
     rewards,risks,mdds = compare_plot_3D(filepath,comb_values,legends,compared_combs)
-    
+
     return legends,rewards,risks,mdds
 
 # %%
@@ -608,8 +604,8 @@ def save_performance_metrixs(legends,rewards,risks,mdds):
         df_list.append(tmp)
         # print(legends[i],rewards[i],risks[i],mdds[i])
         df = pd.DataFrame(df_list,columns=['comb','reward','risk','mdd'])
-        df.to_csv(filepath+'performance-'+market+'-'+str(y)+'-'+str(month)+'.csv',index=False)
-
+    df.to_csv(filepath+'performance-'+market+'-'+str(y)+'-'+str(month)+'.csv',index=False)
+    # print(df)
 
 
 # %%
@@ -619,39 +615,22 @@ if __name__ == '__main__':
     # filepath = 'D:/Alia/Documents/asset allocation/plt/experiance/'
     (y,month,mode,use) = (2018,6,4,1)
     first_input_total = 150000
+    input_month_total = 1
     market = 'us'
     # market = 'tw'
-    
-    # ans = [['IJJ SCC', '0.35051 0.64949']]
-    # ans_new = [['IJJ SCC', '0.4 0.6'],['IJJ SCC', '0.5 0.5']]
-    # # ans = [['LBJ TLH SOXS', '0.31229 0.57214 0.11557']]
-    # # ans_new = [['LBJ TLH SOXS', '1.0 0.0 0.0'], ['LBJ TLH SOXS', '0.80148 0.09926 0.09926']]
-
-    # final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
-
-    # plot_money_sim(filepath,final_input_money,final_sum_money,compared_combs,labels)
-    # legends,rewards,risks,mdds = plot_3D(filepath,final_input_money,final_sum_money,compared_combs,labels)
-    # plot_ann_reward(filepath,final_input_money,final_sum_money,compared_combs,labels)
-    # save_performance_metrixs(legends,rewards,risks,mdds)
-    # # print('performance metrixs:')
-    # # print('comb','reward','risk','mdd')
-    # # for i in range(len(legends)):
-    # #     print(legends[i],rewards[i],risks[i],mdds[i])
-
 ##################### 批次處理 ######################
+ 
     paths = ['us-arima','us-ew','us-hw','us-lstm','us-mvp','us-mvtp']
-    # paths = ['us-hw','us-mvp','us-mvtp']
-    # paths = ['us-lstm']
+    filepath = 'D:/Alia/Documents/asset allocation/output/performance/us-all/'
+    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+paths[0]+'/'
+    allFileName = os.listdir(ans_path)
 
-    # filepath = 'D:/Alia/Documents/asset allocation/experience/fig/us-arima/'
-    # ans_path = 'D:/Alia/Documents/asset allocation/experience/us-arima/'
-    for p in paths:
-        filepath = 'D:/Alia/Documents/asset allocation/output/performance/'+p+'/' # 輸出路徑
-        ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+p+'/' # 預測好的答案放在哪裡
-        allFileList = os.listdir(ans_path)
-        # os.mkdir(filepath)
-        for f in allFileList:
-            print(f)
+    for f in allFileName:
+        print(f)
+        record_comb_moneysim = []
+        for p in paths:
+            print(p)
+            ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+p+'/' # 預測好的答案放在哪裡
             ans_df = pd.read_csv(ans_path+f)
             y = ans_df['year'][0]
             month = ans_df['month'][0]
@@ -665,123 +644,17 @@ if __name__ == '__main__':
             # print(ans_new)
             # 金流模擬計算
             final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
-
-            plot_money_sim(filepath,final_input_money,final_sum_money,compared_combs,labels) # 畫金流模擬圖
-            legends,rewards,risks,mdds = plot_3D(filepath,final_input_money,final_sum_money,compared_combs,labels) # 畫3D圖
-            plot_ann_reward(filepath,final_input_money,final_sum_money,compared_combs,labels) # 畫年化報酬率折線圖
-            save_performance_metrixs(legends,rewards,risks,mdds) # 存performance metrix
-            # break
-        # break
- 
-# %%
-
-# 改3績效陣列直接畫3D圖
-
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-# 2019
-# rewards = [0.231335292,0.123116176,0.148591794,-0.633515762,-0.352292918,-0.608699261,-0.457315385,-0.252530441,0.834319362]
-# risks = [0.1100082,0.099147772,0.101477716,0.432262565,0.408422573,0.508498651,0.490790835,0.272523568,1.107351434]
-# mdds = [0.066183696,0.033392507,0.011268708,0.539668852,0.234817269,0.572911984,0.440476231,0.121090092,0.25582934]
-
-# 2018
-# rewards = [-0.064528885,-0.073095678,-0.048498329,-0.14114819,-0.143104262,-0.429474686,-0.338055962,-0.052034576,1.542250588]
-# risks = [0.216523842,0.163698105,0.180279605,0.574320523,0.228191091,0.683037616,0.919984106,0.130735373,1.921460885]
-# mdds = [0.193489279,0.108768209,0.050098198,0.402846927,0.198522152,0.525458204,0.65073466,0.079838679,0.149457714]
-
-# 2017 
-# rewards = [0.163004115,0.135187909,0.105176024,-0.252891038,-0.185256902,-0.258836396,0.093137374,-0.128705062,0.655650251]
-# risks = [0.130836292,0.123528961,0.128597201,0.48071039,0.427365528,0.501080707,0.742602296,0.366616951,0.995989103]
-# mdds = [0.026101078,0.010925195,0.014687046,0.53952504,0.364468394,0.417539636,0.620339007,0.271787552,0.337393586]
-
-# 2016
-rewards = [0.113046796,0.039380095,0.059770655,-0.474030078,-0.546421224,-0.42258001,-0.748431954,-0.46193478,0.286031473]
-risks = [0.141495174,0.123107411,0.114080307,0.818061878,0.655343493,0.65940516,0.80436484,0.430423855,0.614665822]
-mdds = [0.091875236,0.030559173,0.037839126,0.71283552,0.675396285,0.62630015,0.895372236,0.395598903,0.444561753]
-
-legends = ['market','green horn','mr.market','arima','equal weight','holt winter','lstm','mvp','mvtp']
-color = ['green','black','orange','purple','red','yellow','blue','gray','yellowgreen']
-p=[]
-ax = plt.subplot(projection='3d')
-for i in range(len(rewards)):
-    ttt_fig = ax.scatter([risks[i]],[mdds[i]],[rewards[i]],  marker='o', s=40 ,c=color[i])
-    p.append(ttt_fig)
-ax.set_zlabel('reward') 
-ax.set_ylabel('mdd')
-ax.set_xlabel('risk')
-# ax.legend(p,legends,loc='lower right')
-plt.savefig('D:/Alia/Documents/asset allocation/output/performance/all/3Dfig-us-2016-1.jpg')
-plt.show()
-plt.clf()
-
-# %%
-
-# ans = [['IJJ SCC', '0.35051 0.64949'],
-# ['IJJ UGA SCC SZK', '0.17525 0.17525 0.32475 0.32475'],
-# ['IJJ UGA ESGU SCC SZK DRV', '0.11684 0.11684 0.11684 0.2165 0.2165 0.2165'],
-# ['IJJ UGA ESGU RDIV SCC SZK DRV SDP', '0.08763 0.08763 0.08763 0.08763 0.16237 0.16237 0.16237 0.16237'],
-# ['IJJ UGA ESGU RDIV SHE SCC SZK DRV SDP XES', '0.0701 0.0701 0.0701 0.0701 0.0701 0.1299 0.1299 0.1299 0.1299 0.1299'],
-# ['IJJ UGA ESGU RDIV SHE IAT SCC SZK DRV SDP XES ERX', '0.05842 0.05842 0.05842 0.05842 0.05842 0.05842 0.10825 0.10825 0.10825 0.10825 0.10825 0.10825'],
-# ['IJJ UGA ESGU RDIV SHE IAT XSD SCC SZK DRV SDP XES ERX GDXJ', '0.05007 0.05007 0.05007 0.05007 0.05007 0.05007 0.05007 0.09278 0.09278 0.09278 0.09278 0.09278 0.09278 0.09278'],
-# ]
-
-# ans = [['006208.TW 00674R.TW 00668K.TW', '0.06267 0.47256 0.46477']]
-# ans = [ ['0050.TW 00642U.TW 00661.TW', '0.299 0.45907 0.24193'],
-# ['0050.TW 006204.TW 00642U.TW 00674R.TW 00661.TW 00641R.TW', '0.1495 0.1495 0.22954 0.22954 0.12096 0.12096'],
-# ['0050.TW 006204.TW 0052.TW 00642U.TW 00674R.TW 00638R.TW 00661.TW 00641R.TW 00669R.TW', '0.09967 0.09967 0.09967 0.15302 0.15302 0.15302 0.08064 0.08064 0.08064'],
-# ['0050.TW 006204.TW 0052.TW 0057.TW 00642U.TW 00674R.TW 00638R.TW 00675L.TW 00661.TW 00641R.TW 00669R.TW 00657.TW', '0.07475 0.07475 0.07475 0.07475 0.11477 0.11477 0.11477 0.11477 0.06048 0.06048 0.06048 0.06048'] ]
-# ['0050.TW 006204.TW 0052.TW 0057.TW 006208.TW 00642U.TW 00674R.TW 00638R.TW 00675L.TW 00654R.TW 00661.TW 00641R.TW 00669R.TW 00657.TW 00657K.TW', '0.0598 0.0598 0.0598 0.0598 0.0598 0.09181 0.09181 0.09181 0.09181 0.09181 0.04839 0.04839 0.04839 0.04839 0.04839']]
-
-
-# def run_once(y,month,mode,use,ans,nochange):
-
-#     # ans = choose.choose_target(y)
-#     # ans = [['006208.TW 00674R.TW 00668K.TW', '0.06267 0.47256 0.46477']]
-#     # ans = [['SPY', '1.0']]
-#     print(ans)
-#     if len(ans)==0:
-#         return [],[],[]
-#     comb_list,gotest_candidate = train_evaluation(y,month,ans,mode)
-#     gotest_candidate,final_ans_candidate,final_comb = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total,nochange)
-#     # final_comb[0].print_test_evalu()
-#     # print(final_comb[0].test_sum_money)
-#     # plt.plot(final_comb[0].test_sum_money, color='b')
-#     # plt.plot(final_comb[0].input_money, color='r')
-#     # plt.show()
-#     # print(final_comb[0].test_sum_money[20],final_comb[0].input_money[20])
-#     return gotest_candidate,final_ans_candidate,final_comb
-
-# def compare2market(filepath,y,month,mode,use,market,filename,ans,first_input_total):
-#     if market == 'tw':
-#         ans_market = [twii] # 大盤
-#     elif market == 'us':
-#         ans_market = [spy] # 大盤
-#     comb_list,gotest_candidate = train_evaluation(y,month,ans_market,mode)
-#     gotest_candidate_market,final_ans_candidate_market,final_comb_market = test_evaluation(y,month,gotest_candidate,use,mode,first_input_total)
+            # record_comb_performance.append([p,final_input_money,final_sum_money])
+            record_comb_moneysim.append(final_sum_money)
         
-#     gotest_candidate,final_ans_candidate,final_comb = run_once(y,month,mode,use,ans)
-    
-#     index = 0
-#     first_input = final_comb[0].input_money[0]
-#     for i in range(len(final_comb[0].test_sum_money)):
-#         if final_comb[0].input_money[i]==first_input:
-#             index = i
-#         else:
-#             break
-#     month_r_comb = round((final_comb[0].test_sum_money[index]-first_input)/first_input,5)
-#     month_r_market = round((final_comb_market[0].test_sum_money[index]-first_input)/first_input,5)
-#     txt_comb = 'comb 1 month reward: '+str(month_r_comb)
-#     txt_market = 'market 1 month reward: '+str(month_r_market)
-#     # txt_comb = 'comb reward: '+str(round(final_comb[0].test_ann_reward,5))+', 1month reward: '+str(month_r_comb)
-#     # txt_market = 'market reward: '+str(round(final_comb_market[0].test_ann_reward,5))+', 1month reward: '+str(month_r_market)
+        labels = labels + ['ARIMA','Equal Weight','Holt-Winters','LSTM','MVP','MVTP']
+        
+        plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_combs,labels)
+        legends,rewards,risks,mdds = plot_3D(filepath,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
+        save_performance_metrixs(legends,rewards,risks,mdds) # 存performance metrix
+        plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
+        
+        # break
+        
 
-#     plt.plot(final_comb[0].test_sum_money, color='b',label='comb')
-#     plt.plot(final_comb_market[0].test_sum_money, color='g',label='market')
-#     plt.plot(final_comb[0].input_money, color='r',label='input')
-#     plt.ylim([120000,180000])
-#     plt.legend(loc='lower right')
-#     plt.text(0,175000,txt_comb)
-#     plt.text(0,170000,txt_market)
-#     plt.savefig(filepath+filename)
-#     # plt.show()
-#     plt.clf()
+# %%

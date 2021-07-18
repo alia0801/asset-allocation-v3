@@ -1,13 +1,13 @@
 # %%
 from datetime import date, datetime
 import pymysql
-# import clustering_corr
+import clustering_corr
 import clustering_type
 import pandas as pd
 import math
 import statistics
 # %%
-def generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_etf):
+def generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf):
     if cluster=='type':
         types,ans_df = clustering_type.cluser_by_type(list_etf,db_name)
         number = len(types)
@@ -16,8 +16,8 @@ def generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_e
     elif cluster=='corr':
         # (y,expect_reward,nnnn) = (2018,0.08,3)
         # number=3
-        import clustering_corr
-        med_id,med_name,ans_df = clustering_corr.cluser_by_corr(list_etf,db_name,number,y,expect_reward,nnnn)
+        # import clustering_corr
+        med_id,med_name,ans_df = clustering_corr.cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
 
     groups=[]
     groups.append([market_etf])
@@ -81,8 +81,8 @@ def df_avg2hv(df,ans_len):
     # volatility = statistics.pstdev(df['chg'])
     return volatility
 
-def generate_data(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf):
-    groups,number = generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_etf)
+def generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf):
+    groups,number = generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf)
 
     date1 = date(y,month,1)
     if month==12:
@@ -209,7 +209,7 @@ def generate_training_data(y,month,db_name,groups,number):
 # %%
 
 
-def generate_data_d(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups):
+def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups):
     # groups,number = generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_etf)
 
     date1 = date(y,month,1)
@@ -281,14 +281,14 @@ if __name__ == '__main__':
     db_name = 'my_etf'
     list_etf = ['TW_etf']
     # list_etf = ['US_etf']
-    (y,expect_reward,nnnn,month) = (2018,0.08,1,6) # 2018/1/1~2018/12/31
-    market_etf = '0050.TW'
+    (y,nnnn,month) = (2018,1,6) # 2018/1/1~2018/12/31
+    market_etf = '006204.TW'
     # market_etf = 'SPY'
 
     number = 3
     # cluster = 'type'
     cluster = 'corr'
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_data(y,expect_reward,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_training_data(y,month,db_name,groups,number)
 
     # df_close = pd.DataFrame(closes)
