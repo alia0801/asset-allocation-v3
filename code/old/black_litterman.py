@@ -2,6 +2,7 @@
 from pypfopt import black_litterman, risk_models
 from pypfopt.black_litterman import BlackLittermanModel
 from pypfopt.efficient_frontier import EfficientFrontier
+from pypfopt import objective_functions
 import pandas as pd
 import numpy as np
 import pymysql
@@ -28,15 +29,13 @@ def get_bl_weight(cov_matrix,Q,P,omega,db_name,date1,date2,market_etf):
     bl.bl_weights(delta)
     rets = bl.bl_returns()
     print(rets)
-    ef = EfficientFrontier(rets, cov_matrix,weight_bounds=(0.05,0.5))
-    # weights = ef.efficient_return(target_return=0.001,market_neutral=True)
+    ef = EfficientFrontier(rets, cov_matrix,weight_bounds=(0,1))
+    # ef.efficient_return(target_return=0.001,market_neutral=True)
     # ef.efficient_risk(0)
-    # weights = ef.max_sharpe()
-    weights = ef.min_volatility()
+    weights = ef.max_sharpe()
     cleaned_weights = ef.clean_weights()
-    
+    print(weights,cleaned_weights)
     return cleaned_weights
-
 
 # %%
 if __name__ == '__main__':
@@ -83,3 +82,5 @@ if __name__ == '__main__':
     print(weights)
 
 # %%
+
+

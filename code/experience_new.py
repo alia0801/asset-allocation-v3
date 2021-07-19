@@ -595,7 +595,7 @@ def plot_3D(filepath,final_input_money,record_comb_moneysim,compared_combs,label
 
 # %%
 
-def save_performance_metrixs(legends,rewards,risks,mdds):
+def save_performance_metrixs(filepath,legends,rewards,risks,mdds):
     # print('performance metrixs:')
     # print('comb','reward','risk','mdd')
     df_list = []
@@ -621,10 +621,12 @@ if __name__ == '__main__':
 ##################### 批次處理 ######################
  
     paths = ['us-arima','us-ew','us-hw','us-lstm','us-mvp','us-mvtp']
-    filepath = 'D:/Alia/Documents/asset allocation/output/performance/us-all/'
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/us-all-test/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/us-all-train/'
     ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+paths[0]+'/'
     allFileName = os.listdir(ans_path)
 
+    # test
     for f in allFileName:
         print(f)
         record_comb_moneysim = []
@@ -649,12 +651,47 @@ if __name__ == '__main__':
         
         labels = labels + ['ARIMA','Equal Weight','Holt-Winters','LSTM','MVP','MVTP']
         
-        plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_combs,labels)
-        legends,rewards,risks,mdds = plot_3D(filepath,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
-        save_performance_metrixs(legends,rewards,risks,mdds) # 存performance metrix
-        plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
+        plot_money_sim(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels)
+        legends,rewards,risks,mdds = plot_3D(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
+        save_performance_metrixs(filepath_test,legends,rewards,risks,mdds) # 存performance metrix
+        plot_ann_reward(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
         
         # break
+
+    # train
+    for f in allFileName:
+        print(f)
+        record_comb_moneysim = []
+        for p in paths:
+            print(p)
+            ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+p+'/' # 預測好的答案放在哪裡
+            ans_df = pd.read_csv(ans_path+f)
+            if int(ans_df['month'][0])==1:
+                y = int(ans_df['year'][0])-1
+                month = 12
+            else:
+                y = ans_df['year'][0]
+                month = ans_df['month'][0]-1
+            ans = [[ans_df['names'][0],ans_df['weights'][0]]]
+            ans_new = []
+            for i in range(1,len(ans_df)):
+                tmp = [ans_df['names'][i],ans_df['weights'][i]]
+                ans_new.append(tmp)
+
+            # print(ans)
+            # print(ans_new)
+            # 金流模擬計算
+            final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
+            # record_comb_performance.append([p,final_input_money,final_sum_money])
+            record_comb_moneysim.append(final_sum_money)
         
+        labels = labels + ['ARIMA','Equal Weight','Holt-Winters','LSTM','MVP','MVTP']
+        
+        plot_money_sim(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels)
+        legends,rewards,risks,mdds = plot_3D(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
+        save_performance_metrixs(filepath_train,legends,rewards,risks,mdds) # 存performance metrix
+        plot_ann_reward(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
+        
+        # break    
 
 # %%

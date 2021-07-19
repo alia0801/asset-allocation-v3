@@ -25,8 +25,8 @@ def draw_target(weights,number,groups,every_close_finalday):
     weights = weights/sum_w
 
     for i in range(len(weights)):
-        if weights[i]<0.1 and weights[i]>0:
-            weights[i]=0.1
+        if weights[i]<0.05 and weights[i]>0:
+            weights[i]=0.05
     sum_w = np.sum(weights)
     weights = weights/sum_w
 
@@ -101,8 +101,8 @@ def draw_target_2(weights,number,groups,every_close_finalday):
     weights = weights/sum_w
 
     for i in range(len(weights)):
-        if weights[i]<0.1 and weights[i]>0:
-            weights[i]=0.1
+        if weights[i]<0.05 and weights[i]>0:
+            weights[i]=0.05
     sum_w = np.sum(weights)
     weights = weights/sum_w
 
