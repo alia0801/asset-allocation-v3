@@ -34,7 +34,7 @@ def draw_target(weights,number,groups,every_close_finalday):
     for i in range(len(tmp_w)):
         if tmp_w[i]==0:
             tmp_w[i]=10000
-    if np.min(tmp_w)<0.05:
+    if np.min(tmp_w)<=0.05:
         max_n = 1
     else:
         max_n = math.ceil(np.min(tmp_w/0.05))
@@ -56,7 +56,7 @@ def draw_target(weights,number,groups,every_close_finalday):
         ran_n.append(sort_id)
 
     combs = []
-    for i in range(1,int(max_n)):
+    for i in range(1,int(max_n)+1):
         c = []
         for j in range(number-1):
             c.append([])

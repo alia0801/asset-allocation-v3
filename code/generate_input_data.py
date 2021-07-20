@@ -133,7 +133,13 @@ def generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf):
         df_volume = pd.DataFrame(list(result_volume))
 
         for j in range(1,len(group)):
-            tmp.append(df_close[j][len(df_close)-1])
+            # tmp.append(df_close[j][len(df_close)-1])
+            etf = group[j]
+            sql_scale = "SELECT 規模 FROM `detail` WHERE name = '"+ etf +"'"
+            cursor.execute(sql_scale)
+            result_scale = cursor.fetchall()
+            scale = result_scale[0][0]
+            tmp.append(float((scale.split('(')[0]).replace(',','')))
         
         df_close_avg = df_avg(df_close)
         df_close_avg2 = df_avg(df_close2)
@@ -258,7 +264,13 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
         df_volume = pd.DataFrame(list(result_volume))
 
         for j in range(1,len(group)):
-            tmp.append(df_close[j][len(df_close)-1])
+            # tmp.append(df_close[j][len(df_close)-1])
+            etf = group[j]
+            sql_scale = "SELECT 規模 FROM `detail` WHERE name = '"+ etf +"'"
+            cursor.execute(sql_scale)
+            result_scale = cursor.fetchall()
+            scale = result_scale[0][0]
+            tmp.append(float((scale.split('(')[0]).replace(',','')))
         
         df_close_avg = df_avg(df_close)
         df_close_avg2 = df_avg(df_close2)
