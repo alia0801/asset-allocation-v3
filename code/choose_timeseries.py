@@ -287,20 +287,21 @@ if __name__ == '__main__':
     fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/us-hw/'
     predict_type = 'hw'
 
+############################### 一般演算法 ##################################
     first_y = 2015
-    first_month = 10
+    first_month = 1
     count = 0
-    while count<17:
+    while count<4:
         
         # 設定初始年/月、分群數量，產出第1個組合並動態平衡11次，最後一次會存檔
         
         number = 5 # 分群數
         count += 1
-        if first_month+3>=12:
+        if first_month+12>=12:
             first_y+=1
-            first_month=(first_month+3)-12
+            first_month=(first_month+12)-12
         else:
-            first_month+=3
+            first_month+=12
         print(str(first_y)+'/'+str(first_month))
 
         y = first_y
@@ -317,6 +318,7 @@ if __name__ == '__main__':
 
 
         df_list = [[y,month,ans[0][0],ans[0][1]]]
+        tmp = df_list[0]
 
         groups = [[market_etf]]
         tmp_g = ans_list[0][0].split(' ')
@@ -324,24 +326,22 @@ if __name__ == '__main__':
             groups.append([tmp_g[i]])
         number = len(groups)
 
-        try:
-            # ans_new_list = []
-            for j in range(11):
-                if month!=12:
-                    month += 1
-                else:
-                    y+=1
-                    month=1
 
+        for j in range(11):
+            if month!=12:
+                month += 1
+            else:
+                y+=1
+                month=1
+            try:
                 ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type)
-                # ans_new_list.append(ans_new[0])
-                print(ans_new)
                 tmp = [y,month,ans_new[0][0],ans_new[0][1]]
-                df_list.append(tmp)
-        except:
-            print('error')
-            continue
-
+            except:
+                tmp = [y,month,tmp[2],tmp[3]]
+            
+            print(tmp)
+            df_list.append(tmp)
+        
         # print(ans)
         # print(ans_new_list)
         print(df_list)
@@ -349,6 +349,62 @@ if __name__ == '__main__':
         df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
         df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
 
+################################ 固定標的 只調權重 ####################################
+    # first_y = 2015
+    # first_month = 1
+    # count = 0
+    # while count<4:
+        
+    #     # 設定初始年/月、分群數量，產出第1個組合並動態平衡11次，最後一次會存檔
+        
+    #     number = 5 # 分群數
+    #     count += 1
+    #     if first_month+12>=12:
+    #         first_y+=1
+    #         first_month=(first_month+12)-12
+    #     else:
+    #         first_month+=12
+    #     print(str(first_y)+'/'+str(first_month))
+
+    #     y = first_y
+    #     month = first_month
+
+    #     os.mkdir(fig_filepath+str(first_y)+'-'+str(first_month)+'/')
+    #     ans_list = [['ITOT VEU VNQ AGG','0.36 0.18 0.06 0.4']]
+    #     ans = [ans_list[0]]
+    #     print(ans)
+
+    #     df_list = []
+
+    #     groups = [[market_etf]]
+    #     tmp_g = ans_list[0][0].split(' ')
+    #     for i in range(len(tmp_g)):
+    #         groups.append([tmp_g[i]])
+    #     number = len(groups)
+
+    #     try:
+    #         # ans_new_list = []
+    #         for j in range(12):
+    #             ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type)
+    #             tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+    #             print(tmp)
+    #             df_list.append(tmp)
+                
+    #             if month!=12:
+    #                 month += 1
+    #             else:
+    #                 y+=1
+    #                 month=1
+    #     except:
+    #         print('error')
+    #         continue
+
+    #     # print(ans)
+    #     # print(ans_new_list)
+    #     print(df_list)
+
+    #     df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
+    #     df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
 
     end = time.time()
     print(end-start)

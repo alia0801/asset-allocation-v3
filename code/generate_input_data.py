@@ -132,7 +132,7 @@ def generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf):
         df_close2 = pd.DataFrame(list(result_close2))
         df_volume = pd.DataFrame(list(result_volume))
 
-        for j in range(1,len(group)):
+        for j in range(len(group)):
             # tmp.append(df_close[j][len(df_close)-1])
             etf = group[j]
             sql_scale = "SELECT 規模 FROM `detail` WHERE name = '"+ etf +"'"
@@ -263,7 +263,7 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
         df_close2 = pd.DataFrame(list(result_close2))
         df_volume = pd.DataFrame(list(result_volume))
 
-        for j in range(1,len(group)):
+        for j in range(len(group)):
             # tmp.append(df_close[j][len(df_close)-1])
             etf = group[j]
             sql_scale = "SELECT 規模 FROM `detail` WHERE name = '"+ etf +"'"

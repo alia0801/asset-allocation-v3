@@ -177,19 +177,19 @@ if __name__ == '__main__':
      
 
     first_y = 2015
-    first_month = 10
+    first_month = 1
     count = 0
-    while count<17:
+    while count<4:
 
         # 設定初始年/月、分群數量，產出第1個組合並動態平衡11次，最後一次會存檔
 
         number = 5
         count += 1
-        if first_month+3>=12:
+        if first_month+12>=12:
             first_y+=1
-            first_month=(first_month+3)-12
+            first_month=(first_month+12)-12
         else:
-            first_month+=3
+            first_month+=12
         print(str(first_y)+'/'+str(first_month))
 
         y = first_y
