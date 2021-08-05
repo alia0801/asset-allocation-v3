@@ -282,11 +282,13 @@ if __name__ == '__main__':
         month = first_month
 
         ans_list = choose_target(db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,predict_type)
+        # ans_list = [['VTI VGK VPL VWO BWX IEI','0.15 0.15 0.15 0.15 0.2 0.2']]
         ans = [ans_list[0]]
         print(ans)
 
 
         df_list = [[y,month,ans[0][0],ans[0][1]]]
+        # df_list = []
 
         groups = [[market_etf]]
         tmp_g = ans_list[0][0].split(' ')

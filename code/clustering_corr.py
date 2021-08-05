@@ -104,7 +104,7 @@ def cluser_by_corr(list_etf,db_name,number,y,month,nnnn=1):
         for_clustering.columns = df_reward_std['2']
         for_clustering.index = df_reward_std['2']
         # for_clustering = (for_clustering-for_clustering.mean())/(for_clustering.std())
-        for_clustering = (for_clustering-for_clustering.min())/(for_clustering.max()-for_clustering.min())
+        # for_clustering = (for_clustering-for_clustering.min())/(for_clustering.max()-for_clustering.min())
         for_clustering = for_clustering.fillna(value=0)
         for_clustering.to_csv('my_data.csv', index=True)
         import rpy2.robjects as robjects

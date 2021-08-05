@@ -39,7 +39,7 @@ myetf
     * baseline
         * 目前使用
             * `choose_avg.py` 產出平均權重組合的主程式
-            * `choose_timeseries.py` 以傳統時序分析方式產出組合的主程式:以ARIMA或Holt-winters預測價格、轉為觀點矩陣、套入bl模型計算權重並輸出
+            * `choose_timeseries.py` 以傳統時序分析方式產出組合的主程式:以ARIMA或Holt-winters預測價格(call `time_series_predict`的函式)、轉為觀點矩陣、套入bl模型計算權重並輸出
             * `paper_baseline.py` 分群後以mvp或mvtp產生組合的主程式
             * `time_series_predict.py` 以傳統時序分析方式預測價格的函式
         * 其他

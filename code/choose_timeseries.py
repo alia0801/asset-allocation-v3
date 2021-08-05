@@ -309,6 +309,7 @@ if __name__ == '__main__':
 
         os.mkdir(fig_filepath+str(first_y)+'-'+str(first_month)+'/')
         try:
+            # ans_list = [['VTI VGK VPL VWO BWX IEI','0.15 0.15 0.15 0.15 0.2 0.2']]
             ans_list = choose_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,predict_type)
         except:
             print('error')
@@ -319,6 +320,7 @@ if __name__ == '__main__':
 
         df_list = [[y,month,ans[0][0],ans[0][1]]]
         tmp = df_list[0]
+        # df_list = []
 
         groups = [[market_etf]]
         tmp_g = ans_list[0][0].split(' ')
@@ -341,6 +343,7 @@ if __name__ == '__main__':
             
             print(tmp)
             df_list.append(tmp)
+            
         
         # print(ans)
         # print(ans_new_list)

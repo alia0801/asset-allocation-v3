@@ -260,8 +260,8 @@ if __name__ == '__main__':
 
     # cluster = 'type'
     cluster = 'corr'
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/us-lstm/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/us-lstm/' # 存lstm預測績效圖
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/scale/us-lstm/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/scale/us-lstm/' # 存lstm預測績效圖
 
     batch_size = 10
     hidden_layer = 256
@@ -270,22 +270,22 @@ if __name__ == '__main__':
     epochs = 100
     window_size = 21
 
-
+    # 設定初始年/月
+    first_y = 2017
+    first_month = 1
 ############################# 第1部分 #########################################
 
-    # 設定初始年/月、分群數量，產出第1個組合並動態平衡3次，每次動態平衡後都會存檔
+    # 設定分群數量，產出第1個組合並動態平衡3次，每次動態平衡後都會存檔
 
-    first_y = 2018
-    first_month = 7
     count = 0
     while count<1:
         number = 5
         count += 1
-        if first_month+6>=12:
+        if first_month+12>=12:
             first_y+=1
-            first_month=(first_month+6)-12
+            first_month=(first_month+12)-12
         else:
-            first_month+=6
+            first_month+=12
 
         print(str(first_y)+'/'+str(first_month))
 
@@ -308,17 +308,18 @@ if __name__ == '__main__':
         number = len(groups)
 
         # ans_new_list = []
-        for j in range(3):
+        for j in range(2):
             if month!=12:
                 month += 1
             else:
                 y+=1
                 month=1
-
-            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
-            # ans_new_list.append(ans_new[0])
-            print(ans_new)
-            tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+            try:
+                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+                tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+            except:
+                tmp = [y,month,tmp[2],tmp[3]]
+            print(tmp)
             df_list.append(tmp)
             df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
             df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
@@ -335,26 +336,25 @@ if __name__ == '__main__':
 
 ############################# 第2部分 #########################################
 
-    # 設定初始年/月，讀入第1部分跑的結果，繼續跑動態平衡，每次跑完都會存檔
+    # 讀入第1部分跑的結果，繼續跑動態平衡，每次跑完都會存檔
 
-    first_y = 2018
-    first_month = 7
     count = 0
     while count<1:
         number = 5
         count += 1
-        if first_month+6>=12:
+        if first_month+12>=12:
             first_y+=1
-            first_month=(first_month+6)-12
+            first_month=(first_month+12)-12
         else:
-            first_month+=6
+            first_month+=12
 
         print(str(first_y)+'/'+str(first_month))
         y = first_y
         month = first_month
         lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
+        # os.mkdir(lstm_filepath)
          
-        ################################## 把這裡改成第一部分輸出的結果 ######################################
+        ################################## 在這裡讀入第一部分輸出的結果 ######################################
 
         df = pd.read_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv')
 
@@ -363,11 +363,7 @@ if __name__ == '__main__':
         ans = [ans_list[0]]
         print(ans)
 
-        # # 第1部分的所有結果
-        # df_list = [[2019, 1, 'GUSH DPST LABD SOXS JDST', '0.0 0.24673 0.48312 0.09517 0.17498'],
-        #  [2019, 2, 'GUSH DPST LABD SOXS JDST', '0.09345 0.09345 0.32148 0.49162 0.0'],
-        #   [2019, 3, 'GUSH DPST LABD SOXS JDST', '0.08955 0.5933 0.22761 0.0 0.08955'],
-        #  [2019, 4, 'GUSH DPST LABD SOXS JDST', '0.09188 0.15998 0.2384 0.50974 0.0']]
+        # 第1部分的所有結果
         df_list = []
         for i in range(len(df)):
             tmp = [ int(df['year'][i]), int(df['month'][i]), df['names'][i], df['weights'][i] ] 
@@ -387,17 +383,19 @@ if __name__ == '__main__':
         number = len(groups)
         # ans_new_list = []
         
-        for j in range(8):
+        for j in range(5):
             if month!=12:
                 month += 1
             else:
                 y+=1
                 month=1
             print(y,month)
-            ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
-            # ans_new_list.append(ans_new[0])
-            print(ans_new)
-            tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+            try:
+                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+                tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+            except:
+                tmp = [y,month,tmp[2],tmp[3]]
+            print(tmp)
             df_list.append(tmp)
             df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
             df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
