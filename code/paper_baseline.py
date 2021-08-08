@@ -216,7 +216,8 @@ def choose_target(db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predic
 def dynamic_target(groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type):
 
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
     # train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     if predict_type == 'mvp':

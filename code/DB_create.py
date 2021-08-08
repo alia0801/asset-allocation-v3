@@ -75,12 +75,12 @@ print(etf)
 etf = ['SPY', 'IVV', 'VTI', 'VOO', 'QQQ', 'VEA', 'IEFA', 'AGG', 'VWO', 'IEMG', 'GLD', 'BND', 'VUG', 'IWM', 'VTV', 'IWF', 'IJR', 'IJH', 'EFA', 'LQD', 'VIG', 'IWD', 'VCIT', 'VO', 'VGT', 'VB', 'VXUS', 'BNDX', 'XLK', 'VCSH', 'ITOT', 'VYM', 'VEU', 'IVW', 'USMV', 'IAU', 'VNQ', 'XLF', 'BSV', 'EEM', 'TIP', 'MBB', 'IXUS', 'IWB', 'SCHX', 'XLV', 'IWR', 'DIA', 'SCHF', 'HYG', 'ARKK', 'IGSB', 'VV', 'QUAL', 'MUB', 'VBR', 'MDY', 'PFF', 'IVE', 'RSP', 'SHY', 'XLY', 'EMB', 'SCHB', 'VT', 'SDY', 'SCHD', 'TLT', 'XLE', 'SHV', 'XLI', 'GDX', 'JPST', 'IWP', 'VBK', 'DVY', 'DGRO', 'BIV', 'VGK', 'VXF', 'ACWI', 'MTUM', 'SCHP', 'MINT', 'SCHA', 'GOVT', 'IEF', 'SLV', 'EWJ', 'VHT', 'VMBS', 'SCHG', 'IWN', 'ESGU', 'IWO', 'BIL', 'JNK', 'IWS', 'XLP', 'SCZ', 'VOE', 'GSLC', 'XLU', 'FDN', 'IEI', 'XLC', 'IGIB', 'IWV', 'IBB', 'VTEB', 'EFAV', 'VTIP', 'VLUE', 'ARKG', 'VOT', 'FVD', 'IUSG', 'EFG', 'VGSH', 'MGK', 'SPDW', 'SPYG', 'TQQQ', 'SCHE', 'IHI', 'SCHZ', 'EFV', 'SCHM', 'SCHV', 'IJK', 'FTCS', 'SPLV', 'EWY', 'SPLG', 'SPYV', 'VFH', 'IUSV', 'XBI', 'USHY', 'SCHO', 'IJS', 'SPSB', 'HYLB', 'OEF', 'NOBL', 'CWB', 'ESGE', 'PGX', 'MCHI', 'EWZ', 'VGIT', 'IYW', 'ICLN', 'BBJP', 'LMBS', 'XLB', 'AAXJ', 'IUSB', 'IJJ', 'ARKW', 'EWT', 'VSS', 'SPIB', 'IJT', 'GDXJ', 'SKYY', 'HDV', 'FPE', 'USIG', 'ACWV', 'SPEM', 'VCLT', 'SHYG', 'FNDX', 'FNDF', 'IGV', 'SPAB', 'BKLN', 'VDC', 'VONG', 'BLV', 'FLOT', 'SOXX', 'EZU', 'FTEC', 'DGRW', 'ICSH', 'INDA', 'VCR', 'FTSM', 'VNQI', 'IXN', 'VPL', 'VOOG', 'FIXD', 'AMLP', 'ISTB', 'TAN', 'IDEV', 'SCHH', 'NEAR', 'PRF', 'BBCA', 'SHM', 'VPU', 'SPTM', 'MOAT', 'FXI', 'VIS', 'EEMV', 'ANGL', 'SMH', 'ESGD', 'SUB', 'BOND', 'IYR', 'IEUR', 'VDE', 'FNDA', 'GLDM', 'XSOE', 'SCHR', 'IDV', 'ACWX', 'SJNK', 'FNDE', 'QLD', 'GUNR', 'DBEF', 'SPMD', 'VTWO', 'KWEB', 'MGV', 'ONEQ', 'SPSM', 'USO', 'VONV', 'EMLC', 'QTEC', 'TFI', 'IAGG', 'IWY', 'CIBR', 'MGC', 'BBEU', 'TOTL', 'XT', 'STIP', 'USSG', 'HYD', 'BBIN', 'IGM', 'VIGI', 'SLYV', 'ESGV', 'VOX', 'KBE', 'SSO', 'PDBC', 'SCHC', 'IGF', 'EWU', 'GSY', 'PBW', 'SPTS', 'EWC', 'JETS', 'VNLA', 'SUSL', 'AIA', 'QCLN', 'SPMB', 'SPTL', 'PCY', 'SRLN', 'IOO', 'ITA', 'RPG', 'DON', 'IQLT', 'LIT', 'SOXL', 'XOP', 'DSI', 'VWOB', 'FXL', 'EWG', 'DLN', 'SPHD', 'SGOL', 'VAW', 'KRE', 'IYH', 'BOTZ', 'FHLC', 'SPTI', 'IXJ', 'SPYD', 'ASHR', 'FAS', 'IGLB', 'GBIL', 'SPHQ', 'FV', 'ARKQ', 'REET', 'HEFA', 'RYT', 'SUSA', 'ARKF', 'FLRN', 'SPIP', 'BAB', 'GVI', 'VGLT', 'BSCM', 'FNDC', 'NFRA', 'GSIE', 'PZA', 'HYLS', 'SLYG', 'XLRE', 'MDYG', 'SLQD', 'EPP', 'FBT', 'HACK', 'RODM', 'BSCL', 'KOMP', 'RDVY', 'JHMM', 'PDP', 'FPX', 'VONE', 'GXC', 'HEDJ', 'GEM', 'ITB', 'HYS', 'AMJ', 'FEZ', 'ICF', 'FMB', 'ROBO', 'PTLC', 'VYMI', 'PRFZ', 'BBAX', 'DEM', 'JKE', 'SH', 'DGS', 'EMLP', 'KBWB', 'TECL', 'RSX', 'USMC', 'EWL', 'ITM', 'PGF', 'UPRO', 'EWA', 'XMLV', 'UVXY', 'QYLD', 'XLG', 'CMF', 'IYT', 'MDYV', 'VOOV', 'IBUY', 'DES', 'ILF', 'VSGX', 'FBND', 'EMQQ', 'IYF', 'IEV', 'AOR', 'DXJ', 'SPXL', 'GNR', 'USRT', 'BSCN', 'JKH', 'IBDM', 'RWO', 'FLCB', 'CLOU', 'MJ', 'TNA', 'ICVT', 'XSLV', 'SLY', 'VRP', 'FLQL', 'SQQQ', 'CWI', 'EWH', 'AOM', 'FXH', 'EWW', 'CQQQ', 'IYY', 'QDF', 'TILT', 'SCHK', 'IBDN', 'FDL', 'QLTA', 'TLH', 'HYMB', 'FXD', 'TDIV', 'IBDO', 'PPLT', 'DBC', 'BBMC', 'PHO', 'DLS', 'FTSL', 'RWR', 'PSK', 'VIOO', 'FDIS', 'IYG', 'XHB', 'TDTT', 'REM', 'IYJ', 'XAR', 'OMFL', 'FNGU', 'WCLD', 'PXH', 'IYC', 'BSCO', 'RPV', 'EDV', 'JMST', 'QQEW', 'AOA', 'IVOO', 'IBDP', 'AGGY', 'IGOV', 'ONLN', 'BSCK', 'URTH', 'FREL', 'IHF', 'PULS', 'XSD', 'IXC', 'SIL', 'XME', 'IPAC', 'SIZE', 'PFFD', 'BAR', 'IVOL', 'IWC', 'USFR', 'FTC', 'NUGT', 'EUFN', 'ACES', 'FUTY', 'PXF', 'SDOG', 'FINX', 'PKW', 'IPAY', 'SPLB', 'RPAR', 'PAVE', 'FEX', 'FLCO', 'BWX', 'EBND', 'EAGG', 'JHML', 'VXX', 'PNQI', 'SRVR', 'PSC', 'UCO', 'FIVG', 'IBDQ', 'BBRE', 'INTF', 'FNCL', 'IWX', 'JPIN', 'BSJL', 'KBA', 'IBDL', 'MOO']
 
 # detail欄位名稱 => 預設要有的 : name 資料起始 資料年限 配息率 
-detail_col_list = ['name','etf全名','創立時間', '資料起始', '資料年限', '配息率', '投資區域','投資標的','投資風格','折溢價','殖利率','配息頻率','管理費','總費用率','年化標準差','追蹤指數','基準指數']
+detail_col_list = ['name','etf全名','創立時間', '資料起始', '資料年限', '配息率', '投資區域','投資標的','投資風格','折溢價','殖利率','配息頻率','管理費','總費用率','年化標準差','追蹤指數','基準指數','規模']
 
 createsqltable = """CREATE TABLE IF NOT EXISTS """ + 'detail'  + " (" + " VARCHAR(20),".join(detail_col_list) + " VARCHAR(20))" +  " DEFAULT CHARSET=utf8" + ";"
 print(createsqltable)
     
-db = pymysql.connect("localhost", "root", "esfortest", "test")
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
 cursor = db.cursor()
 
 try:
@@ -115,6 +115,7 @@ cost = []
 y_std = []
 trace_index =[]
 base_index = []
+scale = []
 
 # raw_data是存一個標的全部的基本資料，之後再慢慢切，找到標的性質的位置後再存入，存入後記得把全部的值變回''
 raw_data = []
@@ -157,6 +158,7 @@ for i in range(len(etf)):
         trace_index.append('0')
         base_index.append('0')
         manage.append('0')
+        scale.append('0')
         # 把全部的值變回''
         for i in range(1000):
             raw_data.append('')
@@ -178,6 +180,7 @@ for i in range(len(etf)):
     # print(raw_data)
     name.append(raw_data[10])
     create.append(raw_data[16])
+    scale.append(raw_data[18])
     area.append(raw_data[26])
     buy_type.append(raw_data[24])
     discount.append(raw_data[25])
@@ -251,6 +254,9 @@ print("基準指數")
 print(base_index)
 print(len(base_index))
 
+print("規模")
+print(scale)
+print(len(scale))
 
 # cost是總管理費用(%)	0.03 (含 0.01 非管理費用) 因此需要利用空格切割字串，存入第一部分，cost => ccost
 ccost = []
@@ -260,7 +266,7 @@ for i in range(len(cost)):
 print(ccost)
 
 
-db = pymysql.connect("localhost", "root", "esfortest", "test")
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
 cursor = db.cursor()
 
 for a in range(len(etf)):
@@ -291,6 +297,8 @@ for a in range(len(etf)):
     print(sql11)
     sql12 = "UPDATE detail SET 基準指數 = '"+ base_index[a] +"' WHERE name = '" +etf[a]+"';"
     print(sql12)
+    sql13 = "UPDATE detail SET 規模 = '"+ scale[a] +"' WHERE name = '" +etf[a]+"';"
+    print(sql13)
 
     
     try:
@@ -307,6 +315,7 @@ for a in range(len(etf)):
         cursor.execute(sql10)
         cursor.execute(sql11)
         cursor.execute(sql12)
+        cursor.execute(sql13)
         db.commit()
         print("Data are successfully inserted into detail")
     except Exception as e:
@@ -320,7 +329,7 @@ for a in range(len(etf)):
 
 etf_stk = etf
 
-db = pymysql.connect("localhost", "root", "esfortest", "test")
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
 cursor = db.cursor()
 today = datetime.date.today()
 
@@ -376,7 +385,7 @@ db.close()
 
 ############################################  close 建置   ############################################
 # %%
-db = pymysql.connect("localhost", "root", "esfortest", "test")
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
 cursor = db.cursor()
 
 sql = "CREATE TABLE IF NOT EXISTS close( date date," 
@@ -456,6 +465,149 @@ with open('D:/Alia/Documents/109-1/資產配置/database/close.csv', 'r') as rea
 print("Data are successfully inserted into close")
 
 db.close()
+
+
+############################################  etf_volume 建置   ############################################
+
+etf_stk = etf
+
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
+cursor = db.cursor()
+today = datetime.date.today()
+
+
+for xxx in range(len(etf_stk)):
+    print(xxx+1)
+    stk = yf.Ticker(etf_stk[xxx])
+    # 取得 2000 年至今的資料
+    data = stk.history(start='1990-01-01')
+    # 簡化資料，只取開、高、低、收以及成交量
+    data = data[['Volume']]
+    data['Date'] = data.index
+    data.columns = ['volume','date']
+    data = data.reset_index()
+    data = data.drop(['Date'],axis=1)
+
+
+    found = data['date'][0]
+    found_temp = str(found).split(' ')
+    found_sql = found_temp[0]
+    vary = relativedelta(today,found)
+    found_limit = vary.years
+    print(etf_stk[xxx])
+    print(found_limit)
+
+    length = data.shape[0]
+
+    sql= "UPDATE detail SET `資料年限` ='%s',`資料起始` ='%s' WHERE `name` ='%s'" % (str(found_limit),str(found_sql),str(etf_stk[xxx]))
+
+    cursor.execute(sql)
+    db.commit()
+    print("Data are successfully inserted into detail")
+
+
+    # etf_volume 欄位名稱
+    createsqltable = """CREATE TABLE IF NOT EXISTS """ + 'etf_volume '  + '(name VARCHAR(20),date date,volume VARCHAR(100))'+  " DEFAULT CHARSET=utf8" + ";"
+    print(createsqltable)
+    cursor.execute(createsqltable)
+    db.commit()
+    print("etf_volume table are successfully create")
+
+    # 把input_data寫成sql語法
+    for i in range(length):
+        sql = "INSERT INTO etf_volume (`name`,`date`,`volume`) VALUES"
+        values = "('%s','%s','%s')"
+        sql += values % (etf_stk[xxx],data['date'][i],data['volume'][i])
+        cursor.execute(sql)
+        db.commit()
+    print("Data are successfully inserted into etf_volume")
+
+db.close()
+
+
+############################################  volume 建置   ############################################
+
+db = pymysql.connect("localhost", "root", "esfortest", "my_etf")
+cursor = db.cursor()
+
+sql = "CREATE TABLE IF NOT EXISTS volume( date date," 
+
+for i in range(len(etf_stk)):
+    if i == (len(etf_stk)-1):
+        sql = sql + etf_stk[i] + ' double)'
+    else:
+        sql = sql + etf_stk[i] + ' double,'
+print(sql)
+cursor.execute(sql)
+db.commit()
+print("volume table are successfully create")
+
+etf = ['SPY', 'IVV', 'VTI', 'VOO', 'QQQ', 'VEA', 'IEFA', 'AGG', 'VWO', 'IEMG', 'GLD', 'BND', 'VUG', 'IWM', 'VTV', 'IWF', 'IJR', 'IJH', 'EFA', 'LQD', 'VIG', 'IWD', 'VCIT', 'VO', 'VGT', 'VB', 'VXUS', 'BNDX', 'XLK', 'VCSH', 'ITOT', 'VYM', 'VEU', 'IVW', 'USMV', 'IAU', 'VNQ', 'XLF', 'BSV', 'EEM', 'TIP', 'MBB', 'IXUS', 'IWB', 'SCHX', 'XLV', 'IWR', 'DIA', 'SCHF', 'HYG', 'ARKK', 'IGSB', 'VV', 'QUAL', 'MUB', 'VBR', 'MDY', 'PFF', 'IVE', 'RSP', 'SHY', 'XLY', 'EMB', 'SCHB', 'VT', 'SDY', 'SCHD', 'TLT', 'XLE', 'SHV', 'XLI', 'GDX', 'JPST', 'IWP', 'VBK', 'DVY', 'DGRO', 'BIV', 'VGK', 'VXF', 'ACWI', 'MTUM', 'SCHP', 'MINT', 'SCHA', 'GOVT', 'IEF', 'SLV', 'EWJ', 'VHT', 'VMBS', 'SCHG', 'IWN', 'ESGU', 'IWO', 'BIL', 'JNK', 'IWS', 'XLP', 'SCZ', 'VOE', 'GSLC', 'XLU', 'FDN', 'IEI', 'XLC', 'IGIB', 'IWV', 'IBB', 'VTEB', 'EFAV', 'VTIP', 'VLUE', 'ARKG', 'VOT', 'FVD', 'IUSG', 'EFG', 'VGSH', 'MGK', 'SPDW', 'SPYG', 'TQQQ', 'SCHE', 'IHI', 'SCHZ', 'EFV', 'SCHM', 'SCHV', 'IJK', 'FTCS', 'SPLV', 'EWY', 'SPLG', 'SPYV', 'VFH', 'IUSV', 'XBI', 'USHY', 'SCHO', 'IJS', 'SPSB', 'HYLB', 'OEF', 'NOBL', 'CWB', 'ESGE', 'PGX', 'MCHI', 'EWZ', 'VGIT', 'IYW', 'ICLN', 'BBJP', 'LMBS', 'XLB', 'AAXJ', 'IUSB', 'IJJ', 'ARKW', 'EWT', 'VSS', 'SPIB', 'IJT', 'GDXJ', 'SKYY', 'HDV', 'FPE', 'USIG', 'ACWV', 'SPEM', 'VCLT', 'SHYG', 'FNDX', 'FNDF', 'IGV', 'SPAB', 'BKLN', 'VDC', 'VONG', 'BLV', 'FLOT', 'SOXX', 'EZU', 'FTEC', 'DGRW', 'ICSH', 'INDA', 'VCR', 'FTSM', 'VNQI', 'IXN', 'VPL', 'VOOG', 'FIXD', 'AMLP', 'ISTB', 'TAN', 'IDEV', 'SCHH', 'NEAR', 'PRF', 'BBCA', 'SHM', 'VPU', 'SPTM', 'MOAT', 'FXI', 'VIS', 'EEMV', 'ANGL', 'SMH', 'ESGD', 'SUB', 'BOND', 'IYR', 'IEUR', 'VDE', 'FNDA', 'GLDM', 'XSOE', 'SCHR', 'IDV', 'ACWX', 'SJNK', 'FNDE', 'QLD', 'GUNR', 'DBEF', 'SPMD', 'VTWO', 'KWEB', 'MGV', 'ONEQ', 'SPSM', 'USO', 'VONV', 'EMLC', 'QTEC', 'TFI', 'IAGG', 'IWY', 'CIBR', 'MGC', 'BBEU', 'TOTL', 'XT', 'STIP', 'USSG', 'HYD', 'BBIN', 'IGM', 'VIGI', 'SLYV', 'ESGV', 'VOX', 'KBE', 'SSO', 'PDBC', 'SCHC', 'IGF', 'EWU', 'GSY', 'PBW', 'SPTS', 'EWC', 'JETS', 'VNLA', 'SUSL', 'AIA', 'QCLN', 'SPMB', 'SPTL', 'PCY', 'SRLN', 'IOO', 'ITA', 'RPG', 'DON', 'IQLT', 'LIT', 'SOXL', 'XOP', 'DSI', 'VWOB', 'FXL', 'EWG', 'DLN', 'SPHD', 'SGOL', 'VAW', 'KRE', 'IYH', 'BOTZ', 'FHLC', 'SPTI', 'IXJ', 'SPYD', 'ASHR', 'FAS', 'IGLB', 'GBIL', 'SPHQ', 'FV', 'ARKQ', 'REET', 'HEFA', 'RYT', 'SUSA', 'ARKF', 'FLRN', 'SPIP', 'BAB', 'GVI', 'VGLT', 'BSCM', 'FNDC', 'NFRA', 'GSIE', 'PZA', 'HYLS', 'SLYG', 'XLRE', 'MDYG', 'SLQD', 'EPP', 'FBT', 'HACK', 'RODM', 'BSCL', 'KOMP', 'RDVY', 'JHMM', 'PDP', 'FPX', 'VONE', 'GXC', 'HEDJ', 'GEM', 'ITB', 'HYS']
+
+etf_stk = etf
+stk = yf.Ticker(etf_stk[0])
+# 取得 2000 年至今的資料
+data = stk.history(start='1990-01-01')
+# 簡化資料，只取開、高、低、收以及成交量
+data = data[['Volume']]
+
+for xxx in range(1,len(etf_stk)):
+    print(xxx)
+    print(etf_stk[xxx])
+    stk = yf.Ticker(etf_stk[xxx])
+    # 取得 2000 年至今的資料
+    data1 = stk.history(start='1990-01-01')
+    # 簡化資料，只取開、高、低、收以及成交量
+    data1 = data1[['Volume']]
+    data = pd.merge(data,data1, left_index=True, right_index=True, how='outer')
+
+data.to_csv('D:/Alia/Documents/109-1/資產配置/database/volume.csv', encoding='utf_8_sig')
+
+
+
+db = pymysql.connect("localhost", "root", "esfortest", "test")
+cursor = db.cursor()
+
+# 先做出插入volume的語法 
+sql = "INSERT INTO volume (`date`"
+value = "("
+for i in range(len(etf_stk)):
+    sql = sql + ',`' + etf_stk[i] + '`'
+    if i ==( len(etf_stk)-1):
+        value = value + "'%s'" + ")"
+    else:
+        value = value + "'%s'" + ","
+sql = sql+") VALUES"
+
+# print(sql)
+# print(value)
+
+from csv import reader
+
+with open('D:/Alia/Documents/109-1/資產配置/database/volume.csv', 'r') as read_obj:
+    # pass the file object to reader() to get the reader object
+    csv_reader = reader(read_obj)
+    num = 0
+    for row in csv_reader:
+        # row variable is a list that represents a row in csv
+        # print(len(row))
+        num += 1
+        if num == 1 :
+           continue
+        temp = str(row)
+        temp = temp.replace("'nan'", "NULL")
+        temp = temp.replace("[", "(")
+        temp = temp.replace("]", ")")
+        temp = temp.replace("''", "NULL")
+        sql_temp = sql
+        sql_temp += temp
+        cursor.execute(sql_temp)
+        db.commit()
+
+print("Data are successfully inserted into volume")
+
+db.close()
+
 
 
 ############################################  detail 配息率 建置   ############################################

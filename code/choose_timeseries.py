@@ -132,10 +132,10 @@ def choose_target(filepath,db_name,list_etf,y,nnnn,month,market_etf,number,clust
     for i in range(number):
         if i == 0:
             print('大盤')
-            filename = str(y)+'-'+str(month)+' market.jpg'
+            filename = str(y)+'-'+str(month)+' market.png'
         else:
             print('第'+str(i)+'群')
-            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.jpg'
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
         data_to_use = np.array( train_closes[i])
         # print(data_to_use)
@@ -190,7 +190,8 @@ def choose_target(filepath,db_name,list_etf,y,nnnn,month,market_etf,number,clust
 def dynamic_target(filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -200,10 +201,10 @@ def dynamic_target(filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,numb
     for i in range(number):
         if i == 0:
             print('大盤')
-            filename = str(y)+'-'+str(month)+' market.jpg'
+            filename = str(y)+'-'+str(month)+' market.png'
         else:
             print('第'+str(i)+'群')
-            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.jpg'
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
         data_to_use = np.array( train_closes[i] )
         # data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )

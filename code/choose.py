@@ -9,7 +9,7 @@ import math
 from numpy.lib.function_base import append
 import pandas as pd 
 import generate_input_data
-import rnn
+import new_rnn
 import bl_weight
 import price2matrix
 
@@ -119,7 +119,7 @@ def draw_target_2(weights,number,groups,every_close_finalday):
 
 # %%
 # 產生第一個組合(分群、預測、分配權重、選代表)
-def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
+def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type):
     
     print('generate data')
     closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
@@ -132,15 +132,19 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
     for i in range(number):
         if i == 0:
             print('大盤')
-            filename = str(y)+'-'+str(month)+' market.jpg'
+            filename = str(y)+'-'+str(month)+' market.png'
         else:
             print('第'+str(i)+'群')
-            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.jpg'
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
         data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )
         data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
         
-        mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        if lstm_type=='lstm':
+            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        else:
+            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
         mse_record.append(mse)
         predict_record.append(predict_price)
     
@@ -181,10 +185,11 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
 
 # %%
 # 動態調整組合(根據輸入的組合調權重)
-def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size):
+def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type):
     
     print('generate data')
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     mse_record = []
@@ -194,15 +199,19 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
     for i in range(number):
         if i == 0:
             print('大盤')
-            filename = str(y)+'-'+str(month)+' market.jpg'
+            filename = str(y)+'-'+str(month)+' market.png'
         else:
             print('第'+str(i)+'群')
-            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.jpg'
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
         data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )
         data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
         
-        mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        if lstm_type=='lstm':
+            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        else:
+            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
         mse_record.append(mse)
         predict_record.append(predict_price)
     
@@ -251,22 +260,26 @@ if __name__ == '__main__':
 
     db_name = 'my_etf'
     
-    list_etf = ['US_etf']
-    market_etf = 'SPY'
-    market = 'us'
-    # list_etf = ['TW_etf']
-    # market_etf = '006204.TW'
-    # market = 'tw'
+    # list_etf = ['US_etf']
+    # market_etf = 'SPY'
+    # market = 'us'
+    list_etf = ['TW_etf']
+    market_etf = '006204.TW'
+    market = 'tw'
 
     # cluster = 'type'
     cluster = 'corr'
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/scale/us-lstm/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/scale/us-lstm/' # 存lstm預測績效圖
 
-    batch_size = 10
-    hidden_layer = 256
-    clip_margin = 5
-    learning_rate = 0.001
+    lstm_type = 'lstm'
+    filepath = 'D:/Alia/Documents/asset allocation/output/test/lstm-new/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/test/lstm-new/' # 存lstm預測績效圖
+
+    # lstm_type = 'ecm'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/test/ecm/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/test/ecm/' # 存lstm預測績效圖
+
+    batch_size = 30
+    hidden_layer = 64
     epochs = 100
     window_size = 21
 
@@ -294,7 +307,7 @@ if __name__ == '__main__':
 
         lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
         os.mkdir(lstm_filepath)
-        ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+        ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
         ans = [ans_list[0]]
         print(ans)
 
@@ -308,14 +321,14 @@ if __name__ == '__main__':
         number = len(groups)
 
         # ans_new_list = []
-        for j in range(2):
+        for j in range(1):
             if month!=12:
                 month += 1
             else:
                 y+=1
                 month=1
             try:
-                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
                 tmp = [y,month,ans_new[0][0],ans_new[0][1]]
             except:
                 tmp = [y,month,tmp[2],tmp[3]]
@@ -391,7 +404,7 @@ if __name__ == '__main__':
                 month=1
             print(y,month)
             try:
-                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size)
+                ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
                 tmp = [y,month,ans_new[0][0],ans_new[0][1]]
             except:
                 tmp = [y,month,tmp[2],tmp[3]]

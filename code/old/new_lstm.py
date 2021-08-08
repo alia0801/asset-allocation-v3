@@ -223,7 +223,7 @@ class stock_lstm(keras.Model):
 # %%
 batchsz = 30
 units = 128
-epochs = 3
+epochs = 100
 
 X_train_all = np.array(X[:180])
 y_train_all = np.array(y[:180])
@@ -272,28 +272,30 @@ y_pred_train_all = []
 for i in range(epochs+1):
   print("epoch:",i)
 
-  X_train = np.array(X[i*batchsz:(i+1)*batchsz]) #(batchsz,21,3)
-  y_train = np.array(y[i*batchsz:(i+1)*batchsz]) #(batchsz,1)
-  learn_type_tmp = cal_learn_type(X_train) #(batchsz,21)
-  learn_type_all = np.array(learn_type_tmp).T #(21,batchsz)
-
-  data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
-  data = data.batch(batchsz,drop_remainder=True)
-  data_iter = iter(data)
-  samples = next(data_iter)
-
   model_count = 0
   for model in models:
     print(model_count)
-    model_count+=1
+
+    X_train = np.array(X[model_count*batchsz:(model_count+1)*batchsz]) #(batchsz,21,3)
+    y_train = np.array(y[model_count*batchsz:(model_count+1)*batchsz]) #(batchsz,1)
+    learn_type_tmp = cal_learn_type(X_train) #(batchsz,21)
+    learn_type_all = np.array(learn_type_tmp).T #(21,batchsz)
+
+    data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
+    data = data.batch(batchsz,drop_remainder=True)
+    data_iter = iter(data)
+    samples = next(data_iter)
+
     if i < epochs: #train
       model.load_weights('weights.h5')
       model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+      model.save_weights('weights.h5')
     else: #predict train data
       model.load_weights('weights.h5')
       y_pred_train = model.predict(X_train)
       y_pred_train_all.append(y_pred_train)
-
+    
+    model_count+=1
 
 # %%
 learn_type_tmp = cal_learn_type(X_test) #(batchsz,21)
@@ -329,4 +331,29 @@ total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mea
 print('total mse =', total_mse)
 test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
 print('test mse =', test_mse)
+# %%
+
+scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
+scaled_volume_1m = scaler.fit_transform(data_a_month[1].reshape(-1, 1))
+scaled_vola_1m = scaler.fit_transform(data_a_month[2].reshape(-1, 1))
+X_tmp = [scaled_close_1m,scaled_volume_1m,scaled_vola_1m]
+
+X_1m = []
+for i in range(len(scaled_close_1m)):
+  raw0 = X_tmp[0][i]
+  raw1 = X_tmp[1][i]
+  raw2 = X_tmp[2][i]
+  raw = [ raw0[0], raw1[0], raw2[0]]
+  X_1m.append(raw)
+X_1m = np.array(X_1m)
+
+X_1m_run = []
+for i in range(batchsz):
+  X_1m_run.append(X_1m)
+X_1m_run = np.array(X_1m_run) 
+
+X_1m_run = X_1m_run.reshape(X_test.shape)
+y_pred_ans = test_model.predict(X_1m_run)
+print(y_pred_ans[0])
+
 # %%

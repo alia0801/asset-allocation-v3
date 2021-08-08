@@ -14,9 +14,7 @@ myetf
 ```
 
 ### 程式
-* 資料庫相關
-    * `create_etf_volume.py`
-    * `create_volume.py`
+* 資料庫建立
     * `DB_create.py`
 * 演算法相關
     * 演算法
@@ -27,7 +25,7 @@ myetf
             * `clustering_type.py` 將所有標的依性質分群的函式
             * `generate_input_data.py` 進行分群、產生各群的平均收盤價、波動度、交易量
             * `price2matrix.py` 將預測出來的價格轉為觀點矩陣的函式
-            * `rnn.py` 目前運行lstm的函式
+            * `new_rnn.py` 包含目前運行lstm與ecm-lstm的函式
             * `txo.R` 相關性分群
         * 其他
             * `bl_model.py` 
@@ -35,6 +33,7 @@ myetf
             * `lstm.py` 以close預測close
             * `lstm_3input.py` 以波動度、close、volume預測close
             * `main.py` 舊的產出組合主程式
+            * `new_lstm.py` 實作ecm-lstm，以波動度、close、volume預測close
             
     * baseline
         * 目前使用

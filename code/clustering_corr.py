@@ -131,7 +131,7 @@ def cluser_by_corr(list_etf,db_name,number,y,month,nnnn=1):
         # print(df)
         df = df.reset_index()
         df = df.rename(columns = {'index': 'etf', 'x': 'type'}, inplace = False)
-        return med_id,med_name,df
+        return med_id,med_name,df,number
     else:
         return 0,0,0
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     list_etf = ['TW_etf']
     (y,month,nnnn) = (2018,6,1)
     number=3
-    med_id,med_name,df = cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
+    med_id,med_name,df,number = cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
     print(med_id)
     print(med_name)
     print(df)

@@ -17,7 +17,7 @@ def generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf):
         # (y,expect_reward,nnnn) = (2018,0.08,3)
         # number=3
         # import clustering_corr
-        med_id,med_name,ans_df = clustering_corr.cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
+        med_id,med_name,ans_df,number = clustering_corr.cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
 
     groups=[]
     groups.append([market_etf])
@@ -85,14 +85,14 @@ def generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf):
     groups,number = generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf)
 
     date1 = date(y,month,1)
-    if month==12:
-        date2 = date(y+1,1,1)
-    else:
-        date2 = date(y,month+1,1)
-    if month==1:       
-        date3 = date(y-1,12,1)
-    else:
-        date3 = date(y,month-1,1)    
+    # if month==12:
+    #     date2 = date(y+1,1,1)
+    # else:
+    #     date2 = date(y,month+1,1)
+    # if month==1:       
+    #     date3 = date(y-1,12,1)
+    # else:
+    #     date3 = date(y,month-1,1)    
     
 
     db = pymysql.connect(host="localhost", user="root", password="esfortest", database=str(db_name))
@@ -163,7 +163,7 @@ def generate_training_data(y,month,db_name,groups,number):
 
     date1 = date(y,month,1)
     # date2 = date(y,month+1,1)
-    # date3 = date(y,month-1,1)
+    # date3 = date(y,month-1,1)  
 
     db = pymysql.connect(host="localhost", user="root", password="esfortest", database=str(db_name))
     cursor = db.cursor()
@@ -219,14 +219,14 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
     # groups,number = generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_etf)
 
     date1 = date(y,month,1)
-    if month==12:
-        date2 = date(y+1,1,1)
-    else:
-        date2 = date(y,month+1,1)
-    if month==1:       
-        date3 = date(y-1,12,1)
-    else:
-        date3 = date(y,month-1,1)    
+    # if month==12:
+    #     date2 = date(y+1,1,1)
+    # else:
+    #     date2 = date(y,month+1,1)
+    # if month==1:       
+    #     date3 = date(y-1,12,1)
+    # else:
+    #     date3 = date(y,month-1,1)    
     
 
     db = pymysql.connect(host="localhost", user="root", password="esfortest", database=str(db_name))
@@ -247,9 +247,9 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
             else:
                 sql += ('`'+etf+'`')
         # SELECT * from (SELECT date,SPY FROM close WHERE date < '2020-03-01' order by date DESC limit 21) AS C order by C.date
-        sql_close  = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date2)+"' order by date DESC limit 21) AS C order by C.date")
-        sql_close2 = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date2)+"' order by date DESC limit 42) AS C order by C.date")
-        sql_volume = "SELECT * from (" + sql + (" from `volume` where date < '"+str(date2)+"' order by date DESC limit 21) AS C order by C.date")
+        sql_close  = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 21) AS C order by C.date")
+        sql_close2 = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 42) AS C order by C.date")
+        sql_volume = "SELECT * from (" + sql + (" from `volume` where date < '"+str(date1)+"' order by date DESC limit 21) AS C order by C.date")
         # print(sql_close)
         # print(sql_volume)
         cursor.execute(sql_close)
