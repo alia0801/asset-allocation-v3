@@ -394,7 +394,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
     # )
     # lstm_filepath = 'D:/Alia/Documents/asset allocation/output/test/' # 存lstm預測績效圖
     # filename = 'test.png'
-# %%
+
     
     ('prepare data...')
     scaler = StandardScaler()
@@ -420,7 +420,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
 
     data_test = tf.data.Dataset.from_tensor_slices((X_test,y_test))
     data_test = data_test.batch(batchsz,drop_remainder=True)
-    # %%
+    
     print('create train model...')
     # model_path = 'D:/Alia/Documents/asset allocation/asset-allocation-v3/models/'
 
@@ -457,7 +457,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
             models.append(rnn_model2)
         print('len(models):',len(models))
 
-    # %%
+    
     print('training!!!')
     y_pred_train_all = []
     for i in range(epochs+1):
@@ -494,7 +494,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
     del models
     gc.collect()
 
-    # %%
+    
     
     print('create test model...')
     y_pred_test_all = []
@@ -515,7 +515,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
         del test_model
         gc.collect()
 
-    # %%
+    
 
     y_pred_list_train = []
     y_pred_list_test = []
@@ -538,14 +538,14 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
     # plt.show()
     plt.clf()
     plt.close()
-    # %%
+    
     y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
     y_cal_mse = y[:len(y_model_cal)]
     total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
     print('total mse =', total_mse)
     test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
     print('test mse =', test_mse)
-    # %%
+    
     print('start predict...')
     scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
     scaled_volume_1m = scaler.fit_transform(data_a_month[1].reshape(-1, 1))
@@ -569,7 +569,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
 
     learn_type_tmp = cal_learn_type(X_1m_run) #(batchsz,21)
     learn_type_all = np.array(learn_type_tmp).T #(21,batchsz)
-    # %%
+    
     print('create predict model...')
     pred_model = myECM_lstm(units,learn_type_all)
     pred_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
@@ -622,3 +622,5 @@ if __name__ == '__main__':
 
     end = time.time()
     print(end-start)
+
+# %%

@@ -216,7 +216,7 @@ def generate_training_data(y,month,db_name,groups,number):
 
 
 def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups):
-    # groups,number = generate_group(cluster,y,expect_reward,nnnn,number,market_etf,db_name,list_etf)
+    # groups,number = generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf)
 
     date1 = date(y,month,1)
     # if month==12:

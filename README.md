@@ -34,6 +34,7 @@ myetf
             * `lstm_3input.py` 以波動度、close、volume預測close
             * `main.py` 舊的產出組合主程式
             * `new_lstm.py` 實作ecm-lstm，以波動度、close、volume預測close
+            * `rnn.py` 舊的lstm函式
             
     * baseline
         * 目前使用
@@ -54,5 +55,13 @@ myetf
         * `evaluation_rebalance.py` 
         * `experience_old.py` 
         * `experience.py` 
+
+* 實驗方式
+    1. 產生組合的csv檔
+        * 指令:`python <py檔(如choose.py)> <起始年> <起始月> <跑哪個部分> <跑幾個月>`
+        <跑哪個部分>: 1=一次分群+動態調整 2=讀前面存下的csv繼續動態調整 3=給定標的只調整比例
+        例如: `python choose.py 2015 1 3 2` 表示從2015年1月開始，使用給定的標的，動態調整比例2個月
+    2. 產生圖表
+        * 使用`evaluation_rebalance_new.py`
         
 

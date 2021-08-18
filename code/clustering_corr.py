@@ -2,7 +2,7 @@
 import os
 os.environ['PYTHONHOME'] = r'D:\Alia\Anaconda3'
 os.environ['PYTHONPATH'] = r'D:\Alia\Anaconda3\Lib\site-packages'
-os.environ['R_HOME'] = r'C:\Program Files\R\R-3.6.1'
+os.environ['R_HOME'] = r'D:\Program Files\R\R-4.1.1'
 os.environ['R_USER'] = r'D:\Alia\Anaconda3\Lib\site-packages\rpy2' #path depe
 import sys
 import pandas as pd
@@ -125,7 +125,7 @@ def cluser_by_corr(list_etf,db_name,number,y,month,nnnn=1):
         med_id = med_id[0].split(' ')
         med_name = med_name.split('\n')
         med_name = med_name[0].split(' ')
-        df = pd.read_csv('clustering.csv',index_col = 0)
+        df = pd.read_csv('D:/Alia/Documents/asset allocation/output/cluster/clustering-'+str(y)+'-'+str(month)+'.csv',index_col = 0)
         # print(med_id)
         # print(med_name)
         # print(df)
@@ -139,7 +139,7 @@ def cluser_by_corr(list_etf,db_name,number,y,month,nnnn=1):
 if __name__ == '__main__':
     db_name = 'my_etf'
     list_etf = ['TW_etf']
-    (y,month,nnnn) = (2018,6,1)
+    (y,month,nnnn) = (2017,6,1)
     number=3
     med_id,med_name,df,number = cluser_by_corr(list_etf,db_name,number,y,month,nnnn)
     print(med_id)
