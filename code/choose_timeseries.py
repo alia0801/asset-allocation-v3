@@ -284,8 +284,8 @@ if __name__ == '__main__':
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/us-arima/'
     # predict_type = 'arima'
     
-    filepath = 'D:/Alia/Documents/asset allocation/output/test/hw/'
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/test/hw/'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-hw/'
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/us-hw/'
     predict_type = 'hw'
 
     # first_y = 2015

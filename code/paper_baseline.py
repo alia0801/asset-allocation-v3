@@ -254,9 +254,9 @@ if __name__ == '__main__':
     
     cluster = 'corr'
 
-    filepath = 'D:/Alia/Documents/asset allocation/output/test/mvp/'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-mvp/'
     predict_type = 'mvp'
-    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/us-mvtp/'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-mvtp/'
     # predict_type = 'mvtp'
 
     # ans_list = choose_target(db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,predict_type)

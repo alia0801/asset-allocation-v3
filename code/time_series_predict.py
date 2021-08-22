@@ -27,13 +27,6 @@ def holtwinter(origin_data,filepath,filename):
 
     train_pred_y = list(fit1.fittedvalues)
     predict_y = list(fit1.forecast(21))
-    l1, = plt.plot((train_pred_y + predict_y))
-    l5, = plt.plot(data)
-    plt.legend(handles = [l1, l5], labels = ["aa","data"], loc = 'best', prop={'size': 7})
-    plt.savefig(filepath+filename)
-    # plt.show()
-    plt.clf()
-    plt.close()
 
     flag=0
     for i in range(len(predict_y)):
@@ -47,6 +40,7 @@ def holtwinter(origin_data,filepath,filename):
         # print('predict_y',predict_y)
         test_mse = np.sqrt( ( ( np.array(predict_y) - np.array(data[231:]) ) ** 2).mean() )
         print('HW-test mse =', test_mse)
+        mse_str1 = 'HW-test mse ='+ str(test_mse)
 
         predict_close = (predict_y[-1]+ data_min - 0.001)*std + mean 
         # predict_close = predict_y[-1]
@@ -54,10 +48,23 @@ def holtwinter(origin_data,filepath,filename):
     else:
         test_mse = np.sqrt( ( ( np.array(predict_y[:index]) - np.array(data[231:231+index]) ) ** 2).mean() )
         print('HW-test mse =', test_mse)
+        mse_str1 = 'HW-test mse ='+ str(test_mse)
 
         predict_close = (predict_y[index-1]+ data_min - 0.001)*std + mean 
         # predict_close = predict_y[-1]
         print('HW-predict close =',predict_close)
+
+    fig_y_min = 0
+    fig_y_max = 5
+    l1, = plt.plot((train_pred_y + predict_y))
+    l5, = plt.plot(data)
+    plt.legend(handles = [l1, l5], labels = ["predict","origin"], loc = "lower right", prop={'size': 7})
+    plt.ylim([fig_y_min,fig_y_max])
+    plt.text(0,4.7,mse_str1)
+    plt.savefig(filepath+filename)
+    # plt.show()
+    plt.clf()
+    plt.close()
 
     return test_mse,predict_close
 

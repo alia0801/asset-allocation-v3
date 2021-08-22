@@ -182,7 +182,7 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
     # for i in range(len(ans)):
     #     print(ans[i]) 
 
-    return ans
+    return ans,groups,number
 
 # %%
 # 動態調整組合(根據輸入的組合調權重)
@@ -249,7 +249,7 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
     # for i in range(len(ans)):
     #     print(ans[i]) 
 
-    return ans
+    return ans,groups,number
     
 
 # %%
@@ -271,13 +271,13 @@ if __name__ == '__main__':
     # cluster = 'type'
     cluster = 'corr'
 
-    lstm_type = 'lstm'
-    filepath = 'D:/Alia/Documents/asset allocation/output/test/lstm-test/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/test/lstm-test/' # 存lstm預測績效圖
+    # lstm_type = 'lstm'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/lstm/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/lstm/' # 存lstm預測績效圖
 
-    # lstm_type = 'ecm'
-    # filepath = 'D:/Alia/Documents/asset allocation/output/test/ecm/' # 存組合答案
-    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/test/ecm/' # 存lstm預測績效圖
+    lstm_type = 'ecm'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/ecm/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/ecm/' # 存lstm預測績效圖
 
     batch_size = 30
     hidden_layer = 64
@@ -311,18 +311,18 @@ if __name__ == '__main__':
 
             lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
             os.mkdir(lstm_filepath)
-            ans_list = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+            ans_list,groups,number = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
             ans = [ans_list[0]]
             print(ans)
 
 
             df_list = [[y,month,ans[0][0],ans[0][1]]]
 
-            groups = [[market_etf]]
-            tmp_g = ans_list[0][0].split(' ')
-            for i in range(len(tmp_g)):
-                groups.append([tmp_g[i]])
-            number = len(groups)
+            # groups = [[market_etf]]
+            # tmp_g = ans_list[0][0].split(' ')
+            # for i in range(len(tmp_g)):
+            #     groups.append([tmp_g[i]])
+            # number = len(groups)
 
             # ans_new_list = []
             for j in range(run_len-1):
@@ -332,7 +332,7 @@ if __name__ == '__main__':
                     y+=1
                     month=1
                 try:
-                    ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+                    ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
                     tmp = [y,month,ans_new[0][0],ans_new[0][1]]
                 except:
                     tmp = [y,month,tmp[2],tmp[3]]
@@ -489,5 +489,8 @@ if __name__ == '__main__':
                 first_month=(first_month+12)-12
             else:
                 first_month+=12
+
+    end = time.time()
+    print(end-start)
 
 # %%

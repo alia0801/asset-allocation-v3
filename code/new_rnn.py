@@ -316,23 +316,29 @@ def lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,lstm
     for i in range(len(y_pred_test)):
         y_pred_list_test.append(y_pred_test[i][0])
 
+    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
+    y_cal_mse = y[:len(y_model_cal)]
+    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
+    mse_str1 = 'total mse ='+ str(total_mse)
+    print('total mse =', total_mse)
+    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
+    print('test mse =', test_mse)
+    mse_str2 = 'test mse ='+ str(test_mse)
+
     print('plot...')
+    fig_y_min = -3
+    fig_y_max = 3
     plt.plot(y, label='Original data')
     plt.plot(y_pred_list_train, label='Training data')
     plt.plot(y_pred_list_test, label='Testing data')
-    plt.legend()
+    plt.ylim([fig_y_min,fig_y_max])
+    plt.text(0,2.7,mse_str1)
+    plt.text(0,2.5,mse_str2)
+    plt.legend(loc="lower right")
     plt.savefig(lstm_filepath+filename)
     # plt.show()
     plt.clf()
     plt.close()
-
-    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
-    y_cal_mse = y[:len(y_model_cal)]
-    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
-    print('total mse =', total_mse)
-    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
-    print('test mse =', test_mse)
-    
 
     print('start predict...')
     scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
@@ -442,7 +448,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
             rnn_model = myECM_lstm(units,learn_type_all)
             rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
             rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
-            rnn_model.save_weights('weights.h5')
+            rnn_model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
             # rnn_model.save(model_path+'model-'+str(cut)+'.h5',save_format='tf')
             # tf.saved_model.save(rnn_model,model_path)
             # models.append('model-'+str(cut)+'.h5')
@@ -474,14 +480,14 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
             data_iter = iter(data)
             samples = next(data_iter)
             if i < epochs: #train
-                model.load_weights('weights.h5')
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
                 model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
-                model.save_weights('weights.h5')
+                model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
             else: #predict train data
                 if model_count==0:
                     print('calculate performance...')
                 print('model',model_count)
-                model.load_weights('weights.h5')
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
                 # print(X_train.shape)
                 # if len(X_train)>30:
                     # y_pred_train = 
@@ -508,7 +514,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
         test_model = myECM_lstm(units,learn_type_all)
         test_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
         test_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
-        test_model.load_weights('weights.h5')
+        test_model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
         y_pred_test = test_model.predict(X_test_1batch)
         y_pred_test_all.append(y_pred_test)
 
@@ -529,23 +535,30 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
     # for i in range(len(y_pred_test)):
         # y_pred_list_test.append(y_pred_test[i][0])
 
+    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
+    y_cal_mse = y[:len(y_model_cal)]
+    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
+    mse_str1 = 'total mse ='+ str(total_mse)
+    print('total mse =', total_mse)
+    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
+    print('test mse =', test_mse)
+    mse_str2 = 'test mse ='+ str(test_mse)
+    
     print('plot...')
+    fig_y_min = -3
+    fig_y_max = 3
     plt.plot(y, label='Original data')
     plt.plot(y_pred_list_train, label='Training data')
     plt.plot(y_pred_list_test, label='Testing data')
-    plt.legend()
+    plt.ylim([fig_y_min,fig_y_max])
+    plt.text(0,2.7,mse_str1)
+    plt.text(0,2.5,mse_str2)
+    plt.legend(loc="lower right")
     plt.savefig(lstm_filepath+filename)
     # plt.show()
     plt.clf()
     plt.close()
-    
-    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
-    y_cal_mse = y[:len(y_model_cal)]
-    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
-    print('total mse =', total_mse)
-    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
-    print('test mse =', test_mse)
-    
+       
     print('start predict...')
     scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
     scaled_volume_1m = scaler.fit_transform(data_a_month[1].reshape(-1, 1))
@@ -574,7 +587,7 @@ def ecm_lstm(batchsz,units,epochs,window_size,data_to_use,data_a_month,filename,
     pred_model = myECM_lstm(units,learn_type_all)
     pred_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
     pred_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
-    pred_model.load_weights('weights.h5')
+    pred_model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
 
     # X_1m_run = X_1m_run.reshape(X_test.shape)
     y_pred_ans = pred_model.predict(X_1m_run)

@@ -461,10 +461,10 @@ def calculate_combs(y,month,market,first_input_total,ans,ans_new):
     compared_combs.append(final_comb_market)
 
     if market=='us':
-        labels = ['Market','Green Horn','Mr.Market']
-        exist_comb = [green_horn_comb,mr_market_classic]
-        # labels = ['Market','Green Horn']
-        # exist_comb = [green_horn_comb]
+        # labels = ['Market','Green Horn','Classic']
+        # exist_comb = [green_horn_comb,mr_market_classic]
+        labels = ['Market','Classic']
+        exist_comb = [mr_market_classic]
         for comb in exist_comb:
             final_comb_exist = run_once_money_sim_market(comb,ans_new,'other',first_input_total,y,month,use=1,mode=4)
             compared_combs.append(final_comb_exist)
@@ -498,7 +498,7 @@ def plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_comb
 
     plt.ylim([fig_y_min,fig_y_max])
     plt.legend(loc='upper left')
-    plt.savefig(filepath+'money sim-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    plt.savefig(filepath+'money sim-'+market+'-'+str(y)+'-'+str(month)+'.png')
     # plt.show()
     plt.clf()
     plt.close()
@@ -530,8 +530,8 @@ def cal_ann_reward_list(input_money,sum_money):
 # %%
 def plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_combs,labels):
 
-    fig_y_min = -1
-    fig_y_max = 1.5
+    fig_y_min = -0.5
+    fig_y_max = 0.5
 
     for i in range(len(compared_combs)):
         comb = compared_combs[i]
@@ -544,8 +544,8 @@ def plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_com
         plt.plot(reward_list, color=colors[i+len(compared_combs)],label=labels[i+len(compared_combs)])
 
     plt.ylim([fig_y_min,fig_y_max])
-    plt.legend()
-    plt.savefig(filepath+'ann reward-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    plt.legend( prop={'size': 7})
+    plt.savefig(filepath+'ann reward-'+market+'-'+str(y)+'-'+str(month)+'.png')
     # plt.show()
     plt.clf()
     plt.close()
@@ -562,7 +562,7 @@ def compare_plot_3D(filepath,comb_values,legends,compared_combs):
         risks.append(comb[0].test_risk)
         mdds.append(comb[0].test_mdd)
     for value in comb_values:
-        rewards.append(value[0])
+        rewards.append(value[1])
         risks.append(value[2])
         mdds.append(value[3])
 
@@ -573,11 +573,11 @@ def compare_plot_3D(filepath,comb_values,legends,compared_combs):
     for i in range(len(rewards)):
         ttt_fig = ax.scatter([risks[i]],[mdds[i]],[rewards[i]],  marker='o', s=40 ,c=colors[i])
         p.append(ttt_fig)
-    ax.set_zlabel('reward') 
+    ax.set_zlabel('ann_reward') 
     ax.set_ylabel('mdd')
     ax.set_xlabel('risk')
     ax.legend(p,legends)
-    plt.savefig(filepath+'3Dfig-'+market+'-'+str(y)+'-'+str(month)+'.jpg')
+    plt.savefig(filepath+'3Dfig-'+market+'-'+str(y)+'-'+str(month)+'.png')
     # plt.show()
     plt.clf()
     plt.close()
@@ -606,7 +606,7 @@ def save_performance_metrixs(filepath,legends,rewards,risks,mdds):
         tmp = [legends[i],rewards[i],risks[i],mdds[i]]
         df_list.append(tmp)
         # print(legends[i],rewards[i],risks[i],mdds[i])
-        df = pd.DataFrame(df_list,columns=['comb','reward','risk','mdd'])
+        df = pd.DataFrame(df_list,columns=['comb','ann_reward','risk','mdd'])
     df.to_csv(filepath+'performance-'+market+'-'+str(y)+'-'+str(month)+'.csv',index=False)
     # print(df)
 
@@ -623,12 +623,13 @@ if __name__ == '__main__':
     # market = 'tw'
 ##################### 批次處理 ######################
  
-    paths = ['us-ew','us-hw','us-lstm','us-mvp','us-mvtp']
+    paths = ['us-ecm','us-lstm','us-hw','us-mvp','us-mvtp','us-ew']
     # paths = ['us-maxreward','us-maxSharpe']
-    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/prove del etf/test/'
-    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/prove del etf/train/'
-    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/scale+cut/'
-    allFileName = os.listdir(ans_path+paths[0]+'/')
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/prove dynamic better/test/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/prove dynamic better/train/'
+    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/'
+    # allFileName = os.listdir(ans_path+paths[0]+'/')
+    allFileName = ['ans-us-2016-1.csv']
 
     # test
     for f in allFileName:
@@ -656,7 +657,7 @@ if __name__ == '__main__':
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = labels + ['Equal Weight','Holt-Winters','LSTM','MVP','MVTP']
+        labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
         # labels = labels + ['Max Reward','Max Sharpe']
         
         plot_money_sim(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels)
@@ -696,7 +697,7 @@ if __name__ == '__main__':
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = labels + ['Equal Weight','Holt-Winters','LSTM','MVP','MVTP']
+        labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
         # labels = labels + ['Max Reward','Max Sharpe']
 
         plot_money_sim(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels)
