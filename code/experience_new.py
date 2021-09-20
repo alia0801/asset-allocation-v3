@@ -383,6 +383,7 @@ def calculate_values(final_input_money,final_sum_money):
     mdd = np.max(np.array(dd))
 
     values = [reward,annual_reward,v1_std,mdd]
+    print('[reward,annual_reward,v1_std,mdd]')
     print(values)
 
     return values
@@ -463,6 +464,7 @@ def calculate_combs(y,month,market,first_input_total,ans,ans_new):
     if market=='us':
         # labels = ['Market','Green Horn','Classic']
         # exist_comb = [green_horn_comb,mr_market_classic]
+        # labels = ['Market']
         labels = ['Market','Classic']
         exist_comb = [mr_market_classic]
         for comb in exist_comb:
@@ -558,7 +560,7 @@ def compare_plot_3D(filepath,comb_values,legends,compared_combs):
     risks = []
     mdds = []
     for comb in compared_combs:
-        rewards.append(comb[0].test_reward)
+        rewards.append(comb[0].test_ann_reward)
         risks.append(comb[0].test_risk)
         mdds.append(comb[0].test_mdd)
     for value in comb_values:
@@ -613,6 +615,16 @@ def save_performance_metrixs(filepath,legends,rewards,risks,mdds):
 
 # %%
 
+def get_performance_values(y,month,market,first_input_total,ans,ans_new):
+
+    final_input_money,final_sum_money = run_once_money_sim(ans,ans_new,market,first_input_total,y,month)
+    values = calculate_values(final_input_money,final_sum_money) # values = [reward,annual_reward,v1_std,mdd]
+    
+    return values
+
+
+# %%
+
 if __name__ == '__main__':
     
     # filepath = 'D:/Alia/Documents/asset allocation/plt/experiance/'
@@ -623,13 +635,14 @@ if __name__ == '__main__':
     # market = 'tw'
 ##################### 批次處理 ######################
  
-    paths = ['us-ecm','us-lstm','us-hw','us-mvp','us-mvtp','us-ew']
+    # paths = ['us-ecm','us-lstm','us-hw','us-mvp','us-mvtp','us-ew']
+    paths = ['us-ew','us-corr','us-shape']
     # paths = ['us-maxreward','us-maxSharpe']
-    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/prove dynamic better/test/'
-    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/prove dynamic better/train/'
-    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/'
-    # allFileName = os.listdir(ans_path+paths[0]+'/')
-    allFileName = ['ans-us-2016-1.csv']
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/prove cluster good/test/1y+real classic/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/prove cluster good/train/'
+    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/cluster/1y/'
+    allFileName = os.listdir(ans_path+paths[0]+'/')
+    # allFileName = ['ans-us-2016-1.csv']
 
     # test
     for f in allFileName:
@@ -657,8 +670,8 @@ if __name__ == '__main__':
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
-        # labels = labels + ['Max Reward','Max Sharpe']
+        # labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
+        labels = labels + ['Classic-equal','Correlation','Shape']
         
         plot_money_sim(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels)
         legends,rewards,risks,mdds = plot_3D(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
@@ -706,5 +719,21 @@ if __name__ == '__main__':
         plot_ann_reward(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
         
         # break    
+
+#################### 取得一組合之績效 ##########################
+
+    y = 2015 #起始年
+    month = 1 #起始月
+    market = 'us'
+    ans = [['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']] # 第1個月的組合
+    
+    # 往後每個月的組合
+    ans_new = [ 
+        ['ITOT VEU VNQ AGG','0.46601 0.05 0.05 0.43399'],
+        ['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']
+    ]
+
+    values = get_performance_values(y,month,market,first_input_total,ans,ans_new)
+    # print(values) # values = [reward,annual_reward,v1_std,mdd]
 
 # %%

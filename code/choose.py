@@ -120,7 +120,7 @@ def draw_target_2(weights,number,groups,every_close_finalday):
 
 # %%
 # 產生第一個組合(分群、預測、分配權重、選代表)
-def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type):
+def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type):
     
     print('generate data')
     closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
@@ -141,11 +141,15 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
         data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )
         data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
         
-        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         if lstm_type=='lstm':
-            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-lstm':
+            mse, predict_price = new_rnn.atten_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-ecm':
+            mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
-            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         mse_record.append(mse)
         predict_record.append(predict_price)
     
@@ -186,7 +190,7 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
 
 # %%
 # 動態調整組合(根據輸入的組合調權重)
-def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type):
+def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type):
     
     print('generate data')
     closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
@@ -210,9 +214,13 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
         
         # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
         if lstm_type=='lstm':
-            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-lstm':
+            mse, predict_price = new_rnn.atten_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-ecm':
+            mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
-            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         mse_record.append(mse)
         predict_record.append(predict_price)
     
@@ -272,17 +280,27 @@ if __name__ == '__main__':
     cluster = 'corr'
 
     # lstm_type = 'lstm'
-    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/lstm/' # 存組合答案
-    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/lstm/' # 存lstm預測績效圖
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/new-lstm/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/new-lstm/' # 存lstm預測績效圖
 
-    lstm_type = 'ecm'
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/ecm/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/ecm/' # 存lstm預測績效圖
+    # lstm_type = 'ecm'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/new-ecm/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/new-ecm/' # 存lstm預測績效圖
+
+    # lstm_type = 'atten-ecm'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/atten-ecm-simple/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/atten-ecm-simple/' # 存lstm預測績效圖
+
+    lstm_type = 'atten-lstm'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/atten-lstm-3m/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/atten-lstm-3m/' # 存lstm預測績效圖
 
     batch_size = 30
     hidden_layer = 64
     epochs = 100
-    window_size = 21
+    # window_size = 21
+    window_size_x = 63
+    window_size_y = 21
 
     # 設定初始年/月
     # first_y = 2017
@@ -311,7 +329,7 @@ if __name__ == '__main__':
 
             lstm_filepath = fig_filepath+str(first_y)+'-'+str(first_month)+'/'
             os.mkdir(lstm_filepath)
-            ans_list,groups,number = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+            ans_list,groups,number = choose_target(lstm_filepath,db_name,list_etf,first_y,nnnn,first_month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
             ans = [ans_list[0]]
             print(ans)
 
@@ -332,7 +350,7 @@ if __name__ == '__main__':
                     y+=1
                     month=1
                 try:
-                    ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+                    ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
                     tmp = [y,month,ans_new[0][0],ans_new[0][1]]
                 except:
                     tmp = [y,month,tmp[2],tmp[3]]
@@ -410,7 +428,7 @@ if __name__ == '__main__':
                     month=1
                 print(y,month)
                 try:
-                    ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+                    ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
                     tmp = [y,month,ans_new[0][0],ans_new[0][1]]
                 except:
                     tmp = [y,month,tmp[2],tmp[3]]
@@ -465,7 +483,7 @@ if __name__ == '__main__':
                 
                 print(y,month)
                 try:
-                    ans_new = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size,lstm_type)
+                    ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
                     tmp = [y,month,ans_new[0][0],ans_new[0][1]]
                 except:
                     tmp = [y,month,tmp[2],tmp[3]]
