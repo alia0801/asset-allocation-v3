@@ -13,7 +13,7 @@ import new_rnn
 import bl_weight
 import price2matrix
 import sys
-
+import paper_baseline
 # %%
 
 # 選各群代表、產出組合(第一次選組合)
@@ -138,14 +138,14 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
             print('第'+str(i)+'群')
             filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
-        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )
+        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i],train_closes[0] ] )
         data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
         
         # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         if lstm_type=='lstm':
             mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-lstm':
-            mse, predict_price = new_rnn.atten_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.atten_lstm_lowb_loss_bl(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-ecm':
             mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
@@ -178,6 +178,7 @@ def choose_target(lstm_filepath,db_name,list_etf,y,nnnn,month,market_etf,number,
     weights = []
     for i in range(len(w)):
         weights.append(w[i])
+    weights = bl_weight.get_no_short_weights(weights)
     weights = np.array(weights)
     print('weights',weights)
 
@@ -201,7 +202,7 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
     predict_record = []
 
     print('開始訓練與預測')
-    for i in range(number):
+    for i in range(1,number):
         if i == 0:
             print('大盤')
             filename = str(y)+'-'+str(month)+' market.png'
@@ -209,14 +210,14 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
             print('第'+str(i)+'群')
             filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
         
-        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i] ] )
+        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i],train_closes[0] ] )
         data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
         
         # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
         if lstm_type=='lstm':
             mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-lstm':
-            mse, predict_price = new_rnn.atten_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.atten_lstm_lowb_loss_bl(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-ecm':
             mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
@@ -249,6 +250,7 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
     weights = []
     for i in range(len(w)):
         weights.append(w[i])
+    weights = bl_weight.get_no_short_weights(weights)
     weights = np.array(weights)
     print('weights',weights)
 
@@ -259,6 +261,146 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
 
     return ans,groups,number
     
+# %%
+# 動態調整組合(根據輸入的組合調權重)
+def dynamic_target_mvp(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type):
+    
+    print('generate data')
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
+
+    mse_record = []
+    predict_record = []
+
+    print('開始訓練與預測')
+    for i in range(1,number):
+        if i == 0:
+            print('大盤')
+            filename = str(y)+'-'+str(month)+' market.png'
+        else:
+            print('第'+str(i)+'群')
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
+        
+        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i],train_closes[0] ] )
+        data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
+        
+        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        if lstm_type=='lowb':
+            mse, predict_price_list = new_rnn.atten_lstm_lowb_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='loss':
+            mse, predict_price_list = new_rnn.atten_lstm_loss_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='lowb-loss':
+            mse, predict_price_list = new_rnn.atten_lstm_lowb_loss_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        
+        mse_record.append(mse)
+        predict_record.append(list(predict_price_list))
+        print('predict_record',predict_record)
+    
+    # predict_record = np.array(predict_record)
+    mse_record = np.array(mse_record)
+
+    cal_weight_price = []
+    for i in range(len(predict_record)):
+        tmp = closes[i+1]+predict_record[i]
+        # tmp = train_closes[i+1]+predict_record[i]
+        cal_weight_price.append(tmp)
+    cal_weight_price = np.array(cal_weight_price)
+    print(cal_weight_price.shape)
+
+    # weights = paper_baseline.mvp(predict_record)
+    weights,var,reward = paper_baseline.mvp(cal_weight_price)
+
+    weights = np.array(weights)
+    print('weights',weights)
+
+    # print('answers')
+    ans = draw_target_2(weights,number,groups,every_close_finalday)
+    # for i in range(len(ans)):
+    #     print(ans[i]) 
+
+    return ans,groups,number
+
+# %%
+# 動態調整組合(根據輸入的組合調權重)
+def dynamic_target_newbl(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type):
+    
+    print('generate data')
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
+
+    etfs = []
+    for i in range(1,len(groups)):
+        etfs.append(groups[i][0])
+
+    mse_record = []
+    predict_record = []
+
+    print('開始訓練與預測')
+    for i in range(1,number):
+        if i == 0:
+            print('大盤')
+            filename = str(y)+'-'+str(month)+' market.png'
+        else:
+            print('第'+str(i)+'群')
+            filename = str(y)+'-'+str(month)+' cluster-'+str(i)+'.png'
+        
+        data_to_use = np.array( [ train_closes[i],train_volumes[i],train_volatilitys[i],train_closes[0] ] )
+        data_a_month = np.array([ closes[i], volumes[i], volatilitys[i] ] )
+        
+        # mse, predict_price = rnn.train_lstm(batch_size,hidden_layer,clip_margin,learning_rate,epochs,window_size,data_to_use,data_a_month,filename,lstm_filepath)
+        if lstm_type=='lstm':
+            mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-lstm':
+            mse, predict_price = new_rnn.atten_lstm_corr(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='atten-ecm':
+            mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        else:
+            mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        mse_record.append(mse)
+        predict_record.append(predict_price)
+        print('predict_record',predict_record)
+    
+    price_pred = np.array(predict_record)
+    mse_record = np.array(mse_record)
+
+    views_dict,confidences_dict,cov_matrix = price2matrix.generate_dict(etfs,closes,number,price_pred,mse_record) 
+    print('views_dict',views_dict)
+    print('confidences_dict',confidences_dict)
+    price = pd.DataFrame(closes[1:]).T
+    for i in range(len(closes)-1):
+        price.rename(columns = {i:etfs[i]}, inplace = True)
+
+    # cal_weight_price = []
+    # for i in range(len(predict_record)):
+    #     tmp = closes[i+1]+predict_record[i]
+    #     # tmp = train_closes[i+1]+predict_record[i]
+    #     cal_weight_price.append(tmp)
+    # cal_weight_price = np.array(cal_weight_price)
+    # print(cal_weight_price.shape)
+
+    # weights = paper_baseline.mvp(predict_record)
+    #weights,var,reward = paper_baseline.mvp(cal_weight_price)
+    date1 = datetime.date(y,month,1)
+    if month==12:
+        date2 = datetime.date(y+1,1,1)
+    else:
+        date2 = datetime.date(y,month+1,1)
+    w = bl_weight.get_bl_weight_new(cov_matrix,db_name,date1,date2,market_etf,etfs,views_dict,confidences_dict,price)
+
+    weights = []
+    for i in range(len(w)):
+        weights.append(w[etfs[i]])
+    weights = np.array(weights)
+    print('weights',weights)
+
+    # print('answers')
+    ans = draw_target_2(weights,number,groups,every_close_finalday)
+    # for i in range(len(ans)):
+    #     print(ans[i]) 
+
+    return ans,groups,number
 
 # %%
 
@@ -279,25 +421,44 @@ if __name__ == '__main__':
     # cluster = 'type'
     cluster = 'corr'
 
+    # allocate_weight = 'bl'
     # lstm_type = 'lstm'
     # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/new-lstm/' # 存組合答案
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/new-lstm/' # 存lstm預測績效圖
 
+    # allocate_weight = 'bl'
     # lstm_type = 'ecm'
     # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/new-ecm/' # 存組合答案
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/new-ecm/' # 存lstm預測績效圖
 
+    # allocate_weight = 'bl'
     # lstm_type = 'atten-ecm'
     # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/atten-ecm-simple/' # 存組合答案
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/atten-ecm-simple/' # 存lstm預測績效圖
 
+    allocate_weight = 'bl'
     lstm_type = 'atten-lstm'
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/atten-lstm-3m/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/atten-lstm-3m/' # 存lstm預測績效圖
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
 
-    batch_size = 30
+    #allocate_weight = 'mvp'
+    #lstm_type = 'lowb'
+    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
+    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+
+    #allocate_weight = 'mvp'
+    #lstm_type = 'loss'
+    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
+    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+
+    #allocate_weight = 'mvp'
+    #lstm_type = 'lowb-loss'
+    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
+    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+
+    batch_size = 90
     hidden_layer = 64
-    epochs = 100
+    epochs = 10
     # window_size = 21
     window_size_x = 63
     window_size_y = 21
@@ -427,14 +588,18 @@ if __name__ == '__main__':
                     y+=1
                     month=1
                 print(y,month)
-                try:
+                # try:
+                if allocate_weight=='mvp':
+                    ans_new,groups,number = dynamic_target_mvp(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
+                elif allocate_weight=='bl':
                     ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
-                    tmp = [y,month,ans_new[0][0],ans_new[0][1]]
-                except:
-                    tmp = [y,month,tmp[2],tmp[3]]
+                tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+                # except:
+                    # tmp = [y,month,tmp[2],tmp[3]]
                 print(tmp)
                 df_list.append(tmp)
                 df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
+                # df = pd.DataFrame(df_list,columns=['year','month','names','weights','var','reward'])
                 df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
             # print(ans)
             # print(ans_new_list)
@@ -482,13 +647,17 @@ if __name__ == '__main__':
             for j in range(run_len):
                 
                 print(y,month)
-                try:
+                # try:
+                if allocate_weight=='mvp':
+                    ans_new,groups,number = dynamic_target_mvp(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
+                elif allocate_weight=='bl':
                     ans_new,groups,number = dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,batch_size,hidden_layer,epochs,window_size_x,window_size_y,lstm_type)
-                    tmp = [y,month,ans_new[0][0],ans_new[0][1]]
-                except:
-                    tmp = [y,month,tmp[2],tmp[3]]
+                tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+                # except:
+                    # tmp = [y,month,tmp[2],tmp[3]]
                 print(tmp)
                 df_list.append(tmp)
+                # df = pd.DataFrame(df_list,columns=['year','month','names','weights','var','reward'])
                 df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
                 df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
                 if month!=12:

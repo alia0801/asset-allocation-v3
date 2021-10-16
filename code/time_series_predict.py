@@ -21,7 +21,7 @@ def holtwinter(origin_data,filepath,filename):
     data_scaler = (origin_data-mean)/std
     data_min = np.min(data_scaler)
     data = list(data_scaler-data_min+0.001)
-    data_sr = pd.Series(data[:231])
+    data_sr = pd.Series(data[:735])
     # print(data_sr)
     fit1 = ExponentialSmoothing(data_sr, seasonal_periods=4, trend='add', seasonal='add').fit(use_boxcox=True)
 
@@ -38,7 +38,7 @@ def holtwinter(origin_data,filepath,filename):
     
     if flag ==0:
         # print('predict_y',predict_y)
-        test_mse = np.sqrt( ( ( np.array(predict_y) - np.array(data[231:]) ) ** 2).mean() )
+        test_mse = np.sqrt( ( ( np.array(predict_y) - np.array(data[735:]) ) ** 2).mean() )
         print('HW-test mse =', test_mse)
         mse_str1 = 'HW-test mse ='+ str(test_mse)
 
@@ -46,7 +46,7 @@ def holtwinter(origin_data,filepath,filename):
         # predict_close = predict_y[-1]
         print('HW-predict close =',predict_close)
     else:
-        test_mse = np.sqrt( ( ( np.array(predict_y[:index]) - np.array(data[231:231+index]) ) ** 2).mean() )
+        test_mse = np.sqrt( ( ( np.array(predict_y[:index]) - np.array(data[735:735+index]) ) ** 2).mean() )
         print('HW-test mse =', test_mse)
         mse_str1 = 'HW-test mse ='+ str(test_mse)
 

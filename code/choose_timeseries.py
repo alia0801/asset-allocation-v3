@@ -175,6 +175,7 @@ def choose_target(filepath,db_name,list_etf,y,nnnn,month,market_etf,number,clust
     weights = []
     for i in range(len(w)):
         weights.append(w[i])
+    weights = bl_weight.get_no_short_weights(weights)
     weights = np.array(weights)
     print('weights',weights)
 
@@ -194,11 +195,15 @@ def dynamic_target(filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,numb
     # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_input_data.generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
+    etfs = []
+    for i in range(1,len(groups)):
+        etfs.append(groups[i][0])
+
     mse_record = []
     predict_record = []
 
     print('開始訓練與預測')
-    for i in range(number):
+    for i in range(1,number):
         if i == 0:
             print('大盤')
             filename = str(y)+'-'+str(month)+' market.png'
@@ -232,26 +237,37 @@ def dynamic_target(filepath,groups,db_name,list_etf,y,nnnn,month,market_etf,numb
     # print('omega',omega)
     # print('cov_matrix',cov_matrix)
 
+    # views_dict,confidences_dict,cov_matrix = price2matrix.generate_dict(etfs,closes,number,predict_record,mse_record)
+    # print('views_dict',views_dict)
+    # print('confidences_dict',confidences_dict)
+    # price = pd.DataFrame(closes[1:]).T
+    #for i in range(len(closes)-1):
+    #    price.rename(columns = {i:etfs[i]}, inplace = True)
+
     date1 = datetime.date(y,month,1)
     if month==12:
         date2 = datetime.date(y+1,1,1)
     else:
         date2 = datetime.date(y,month+1,1)
-    
+    # w = bl_weight.get_bl_weight_new(cov_matrix,db_name,date1,date2,market_etf,etfs,views_dict,confidences_dict,price)
     w = bl_weight.get_bl_weight(cov_matrix,Q,P,omega,db_name,date1,date2,market_etf)
-    print('bl_weights',w)
+    # print('bl_weights',w)
     
     weights = []
+    # for i in range(len(w)):
+    #     if np.isnan(w[i]):
+    #         weights.append(0)
+    #     else:
+    #         weights.append(w[i])
+    # weights = np.array(weights)
+    # if np.sum(weights)==0:
+    #     weights = []
+    #     for i in range(len(w)):
+    #         weights.append(1/len(w))
     for i in range(len(w)):
-        if np.isnan(w[i]):
-            weights.append(0)
-        else:
-            weights.append(w[i])
+        weights.append(w[i])
+    weights = bl_weight.get_no_short_weights(weights)
     weights = np.array(weights)
-    if np.sum(weights)==0:
-        weights = []
-        for i in range(len(w)):
-            weights.append(1/len(w))
     print('weights',weights)
 
     # print('answers')
@@ -284,8 +300,8 @@ if __name__ == '__main__':
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/us-arima/'
     # predict_type = 'arima'
     
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-hw/'
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/us-hw/'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/hw-newbl/'
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test-hw/'
     predict_type = 'hw'
 
     # first_y = 2015
@@ -380,7 +396,7 @@ if __name__ == '__main__':
             y = first_y
             month = first_month
 
-            os.mkdir(fig_filepath+str(first_y)+'-'+str(first_month)+'/')
+            # os.mkdir(fig_filepath+str(first_y)+'-'+str(first_month)+'/')
             ans_list = [['ITOT VEU VNQ AGG','0.36 0.18 0.06 0.4']]
             ans = [ans_list[0]]
             print(ans)
@@ -393,25 +409,23 @@ if __name__ == '__main__':
                 groups.append([tmp_g[i]])
             number = len(groups)
 
-            try:
+            # try:
                 # ans_new_list = []
-                for j in range(run_len):
-                    ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type)
-                    tmp = [y,month,ans_new[0][0],ans_new[0][1]]
-                    print(tmp)
-                    df_list.append(tmp)
-
-                    df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
-                    df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
-
-                    if month!=12:
-                        month += 1
-                    else:
-                        y+=1
-                        month=1
-            except:
-                print('error')
-                continue
+            for j in range(run_len):
+                ans_new = dynamic_target(fig_filepath+str(first_y)+'-'+str(first_month)+'/',groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predict_type)
+                tmp = [y,month,ans_new[0][0],ans_new[0][1]]
+                print(tmp)
+                df_list.append(tmp)
+                df = pd.DataFrame(df_list,columns=['year','month','names','weights'])
+                df.to_csv(filepath+'ans-'+market+'-'+str(first_y)+'-'+str(first_month)+'.csv',index=False)
+                if month!=12:
+                    month += 1
+                else:
+                    y+=1
+                    month=1
+            # except:
+                # print('error')
+                # continue
 
             # print(ans)
             # print(ans_new_list)

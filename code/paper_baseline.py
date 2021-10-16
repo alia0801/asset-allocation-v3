@@ -64,23 +64,27 @@ def calculate(closes):
         sr = port_ret / port_sd
         sharpe_ratio[i] = sr
     
-    return all_wts,port_risk,sharpe_ratio
+    return all_wts,port_risk,sharpe_ratio,port_returns
 
 # 找到最低標準差
 def mvp(closes):
 
-    all_wts,port_risk,sharpe_ratio = calculate(closes)
+    all_wts,port_risk,sharpe_ratio,port_returns = calculate(closes)
     min_var = all_wts[port_risk.argmin()]
+    var = port_risk[port_risk.argmin()]
+    reward = port_returns[port_risk.argmin()]
     # print(min_var)
-    return min_var
+    return min_var,var,reward
 
 # 找到最大夏普值
 def mvtp(closes):
 
-    all_wts,port_risk,sharpe_ratio = calculate(closes)
+    all_wts,port_risk,sharpe_ratio,port_returns = calculate(closes)
     max_sr = all_wts[sharpe_ratio.argmax()]
+    var = port_risk[sharpe_ratio.argmax()]
+    reward = port_returns[sharpe_ratio.argmax()]
     # print(max_sr)
-    return max_sr
+    return max_sr,var,reward
 
 # %%
 # 選各群代表、產出組合(第一次選組合)
@@ -195,9 +199,9 @@ def choose_target(db_name,list_etf,y,nnnn,month,market_etf,number,cluster,predic
     train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
     
     if predict_type == 'mvp':
-        weights = mvp(closes[1:])
+        weights,var,reward = mvp(closes[1:])
     elif predict_type == 'mvtp':
-        weights = mvtp(closes[1:])
+        weights,var,reward = mvtp(closes[1:])
 
     # weights = []
     # for i in range(len(w)):
@@ -222,9 +226,9 @@ def dynamic_target(groups,db_name,list_etf,y,nnnn,month,market_etf,number,cluste
     # train_closes,train_volumes,train_volatilitys = generate_input_data.generate_training_data(y,month,db_name,groups,number)
 
     if predict_type == 'mvp':
-        weights = mvp(closes[1:])
+        weights,var,reward = mvp(closes[1:])
     elif predict_type == 'mvtp':
-        weights = mvtp(closes[1:])
+        weights,var,reward = mvtp(closes[1:])
 
     weights = np.array(weights)
     print('weights',weights)
@@ -254,9 +258,9 @@ if __name__ == '__main__':
     
     cluster = 'corr'
 
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-mvp/'
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/mvp-3y/'
     predict_type = 'mvp'
-    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/us-mvtp/'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/mvtp-3y/'
     # predict_type = 'mvtp'
 
     # ans_list = choose_target(db_name,list_etf,y,expect_reward,nnnn,month,market_etf,number,cluster,predict_type)

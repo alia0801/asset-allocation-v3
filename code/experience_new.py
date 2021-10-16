@@ -490,13 +490,14 @@ def plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_comb
 
     plt.plot(final_input_money, color='red',label='input')
 
-    for i in range(len(compared_combs)):
-        comb = compared_combs[i]
-        plt.plot(comb[0].test_sum_money, color=colors[i],label=labels[i])
+    # for i in range(len(compared_combs)):
+    #     comb = compared_combs[i]
+    #     plt.plot(comb[0].test_sum_money, color=colors[i],label=labels[i])
 
     for i in range(len(record_comb_moneysim)):
         final_sum_money = record_comb_moneysim[i]
-        plt.plot(final_sum_money, color=colors[i+len(compared_combs)],label=labels[i+len(compared_combs)])
+        # plt.plot(final_sum_money, color=colors[i+len(compared_combs)],label=labels[i+len(compared_combs)])
+        plt.plot(final_sum_money, color=colors[i],label=labels[i])
 
     plt.ylim([fig_y_min,fig_y_max])
     plt.legend(loc='upper left')
@@ -535,15 +536,16 @@ def plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_com
     fig_y_min = -0.5
     fig_y_max = 0.5
 
-    for i in range(len(compared_combs)):
-        comb = compared_combs[i]
-        reward_list = cal_ann_reward_list(final_input_money,comb[0].test_sum_money)
-        plt.plot(reward_list, color=colors[i],label=labels[i])
+    # for i in range(len(compared_combs)):
+    #     comb = compared_combs[i]
+    #     reward_list = cal_ann_reward_list(final_input_money,comb[0].test_sum_money)
+    #     plt.plot(reward_list, color=colors[i],label=labels[i])
 
     for i in range(len(record_comb_moneysim)):
         final_sum_money = record_comb_moneysim[i]
         reward_list = cal_ann_reward_list(final_input_money,final_sum_money)
-        plt.plot(reward_list, color=colors[i+len(compared_combs)],label=labels[i+len(compared_combs)])
+        # plt.plot(reward_list, color=colors[i+len(compared_combs)],label=labels[i+len(compared_combs)])
+        plt.plot(reward_list, color=colors[i],label=labels[i])
 
     plt.ylim([fig_y_min,fig_y_max])
     plt.legend( prop={'size': 7})
@@ -559,10 +561,10 @@ def compare_plot_3D(filepath,comb_values,legends,compared_combs):
     rewards = []
     risks = []
     mdds = []
-    for comb in compared_combs:
-        rewards.append(comb[0].test_ann_reward)
-        risks.append(comb[0].test_risk)
-        mdds.append(comb[0].test_mdd)
+    # for comb in compared_combs:
+    #     rewards.append(comb[0].test_ann_reward)
+    #     risks.append(comb[0].test_risk)
+    #     mdds.append(comb[0].test_mdd)
     for value in comb_values:
         rewards.append(value[1])
         risks.append(value[2])
@@ -635,14 +637,15 @@ if __name__ == '__main__':
     # market = 'tw'
 ##################### 批次處理 ######################
  
-    # paths = ['us-ecm','us-lstm','us-hw','us-mvp','us-mvtp','us-ew']
-    paths = ['us-ew','us-corr','us-shape']
+    paths = ['us-market','us-classic','atten-lstm-corr-new','us-lstm','us-hw','mvp-3m','mvtp-3m','us-ew']
+    # paths = ['us-market','us-classic','atten-lstm-corr-new','atten-lstm-mvp3m','atten-lstm-mvp3mtrue']
+    # paths = ['us-market','us-classic','atten-lstm-corr-new']
     # paths = ['us-maxreward','us-maxSharpe']
-    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/prove cluster good/test/1y+real classic/'
-    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/prove cluster good/train/'
-    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/cluster/1y/'
-    allFileName = os.listdir(ans_path+paths[0]+'/')
-    # allFileName = ['ans-us-2016-1.csv']
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/0927/test/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/0927/train/'
+    ans_path = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/'
+    # allFileName = os.listdir(ans_path+paths[0]+'/')
+    allFileName = ['ans-us-2015-1.csv','ans-us-2016-1.csv']
 
     # test
     for f in allFileName:
@@ -666,12 +669,15 @@ if __name__ == '__main__':
             final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
             # record_comb_performance.append([p,final_input_money,final_sum_money])
             record_comb_moneysim.append(final_sum_money)
+        # for comb in compared_combs:
+        #     record_comb_moneysim.append(comb[0].test_sum_money)
         
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        # labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
-        labels = labels + ['Classic-equal','Correlation','Shape']
+        labels = ['Market','Classic','New LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
+        # labels = ['Market','Classic','passed','pred lower','pred true']
+        # labels = ['csv-market','csv-classic','New LSTM']
         
         plot_money_sim(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels)
         legends,rewards,risks,mdds = plot_3D(filepath_test,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
@@ -680,60 +686,60 @@ if __name__ == '__main__':
         
         # break
 
-    # train
-    for f in allFileName:
-        print(f)
-        record_comb_moneysim = []
-        for p in paths:
-            print(p)
-            # ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+p+'/' # 預測好的答案放在哪裡
-            ans_df = pd.read_csv(ans_path+p+'/'+f)
-            if int(ans_df['month'][0])==1:
-                y = int(ans_df['year'][0])-1
-                month = 12
-            else:
-                y = ans_df['year'][0]
-                month = ans_df['month'][0]-1
-            ans = [[ans_df['names'][0],str(ans_df['weights'][0])]]
-            ans_new = []
-            for i in range(1,len(ans_df)):
-                tmp = [ans_df['names'][i],str(ans_df['weights'][i])]
-                ans_new.append(tmp)
+    # # train
+    # for f in allFileName:
+    #     print(f)
+    #     record_comb_moneysim = []
+    #     for p in paths:
+    #         print(p)
+    #         # ans_path = 'D:/Alia/Documents/asset allocation/output/answer/'+p+'/' # 預測好的答案放在哪裡
+    #         ans_df = pd.read_csv(ans_path+p+'/'+f)
+    #         if int(ans_df['month'][0])==1:
+    #             y = int(ans_df['year'][0])-1
+    #             month = 12
+    #         else:
+    #             y = ans_df['year'][0]
+    #             month = ans_df['month'][0]-1
+    #         ans = [[ans_df['names'][0],str(ans_df['weights'][0])]]
+    #         ans_new = []
+    #         for i in range(1,len(ans_df)):
+    #             tmp = [ans_df['names'][i],str(ans_df['weights'][i])]
+    #             ans_new.append(tmp)
 
-            # print(ans)
-            # print(ans_new)
-            # 金流模擬計算
-            final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
-            # record_comb_performance.append([p,final_input_money,final_sum_money])
-            record_comb_moneysim.append(final_sum_money)
+    #         # print(ans)
+    #         # print(ans_new)
+    #         # 金流模擬計算
+    #         final_input_money,final_sum_money,compared_combs,labels = calculate_combs(y,month,market,first_input_total,ans,ans_new)
+    #         # record_comb_performance.append([p,final_input_money,final_sum_money])
+    #         record_comb_moneysim.append(final_sum_money)
         
-        for i in range(len(record_comb_moneysim)):
-            final_sum_money = record_comb_moneysim[i]
-            record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = labels + ['ECM-LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
-        # labels = labels + ['Max Reward','Max Sharpe']
+    #     for i in range(len(record_comb_moneysim)):
+    #         final_sum_money = record_comb_moneysim[i]
+    #         record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
+    #     labels = labels + ['New LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
+    #     # labels = labels + ['Max Reward','Max Sharpe']
 
-        plot_money_sim(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels)
-        legends,rewards,risks,mdds = plot_3D(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
-        save_performance_metrixs(filepath_train,legends,rewards,risks,mdds) # 存performance metrix
-        plot_ann_reward(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
+    #     plot_money_sim(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels)
+    #     legends,rewards,risks,mdds = plot_3D(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫3D圖
+    #     save_performance_metrixs(filepath_train,legends,rewards,risks,mdds) # 存performance metrix
+    #     plot_ann_reward(filepath_train,final_input_money,record_comb_moneysim,compared_combs,labels) # 畫年化報酬率折線圖
         
         # break    
 
 #################### 取得一組合之績效 ##########################
 
-    y = 2015 #起始年
-    month = 1 #起始月
-    market = 'us'
-    ans = [['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']] # 第1個月的組合
+    # y = 2015 #起始年
+    # month = 1 #起始月
+    # market = 'us'
+    # ans = [['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']] # 第1個月的組合
     
-    # 往後每個月的組合
-    ans_new = [ 
-        ['ITOT VEU VNQ AGG','0.46601 0.05 0.05 0.43399'],
-        ['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']
-    ]
+    # # 往後每個月的組合
+    # ans_new = [ 
+    #     ['ITOT VEU VNQ AGG','0.46601 0.05 0.05 0.43399'],
+    #     ['ITOT VEU VNQ AGG','0.05 0.43234 0.05 0.46766']
+    # ]
 
-    values = get_performance_values(y,month,market,first_input_total,ans,ans_new)
+    # values = get_performance_values(y,month,market,first_input_total,ans,ans_new)
     # print(values) # values = [reward,annual_reward,v1_std,mdd]
 
 # %%

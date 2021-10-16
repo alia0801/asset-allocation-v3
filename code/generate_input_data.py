@@ -247,9 +247,9 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
             else:
                 sql += ('`'+etf+'`')
         # SELECT * from (SELECT date,SPY FROM close WHERE date < '2020-03-01' order by date DESC limit 21) AS C order by C.date
-        sql_close  = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 21) AS C order by C.date")
-        sql_close2 = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 42) AS C order by C.date")
-        sql_volume = "SELECT * from (" + sql + (" from `volume` where date < '"+str(date1)+"' order by date DESC limit 21) AS C order by C.date")
+        sql_close  = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 63) AS C order by C.date")
+        sql_close2 = "SELECT * from (" + sql + (" from `close`  where date < '"+str(date1)+"' order by date DESC limit 84) AS C order by C.date")
+        sql_volume = "SELECT * from (" + sql + (" from `volume` where date < '"+str(date1)+"' order by date DESC limit 63) AS C order by C.date")
         # print(sql_close)
         # print(sql_volume)
         cursor.execute(sql_close)
