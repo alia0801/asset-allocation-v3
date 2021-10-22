@@ -246,12 +246,13 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
     else:
         date2 = datetime.date(y,month+1,1)
     
-    w = bl_weight.get_bl_weight(cov_matrix,Q,P,omega,db_name,date1,date2,market_etf)
-    weights = []
-    for i in range(len(w)):
-        weights.append(w[i])
-    weights = bl_weight.get_no_short_weights(weights)
-    weights = np.array(weights)
+    weights = bl_weight.get_bl_weight_by_matlab(Q,P,omega)
+    # w = bl_weight.get_bl_weight(cov_matrix,Q,P,omega,db_name,date1,date2,market_etf)
+    # weights = []
+    # for i in range(len(w)):
+    #     weights.append(w[i])
+    # weights = bl_weight.get_no_short_weights(weights)
+    # weights = np.array(weights)
     print('weights',weights)
 
     # print('answers')
@@ -292,6 +293,8 @@ def dynamic_target_mvp(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market
             mse, predict_price_list = new_rnn.atten_lstm_loss_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='lowb-loss':
             mse, predict_price_list = new_rnn.atten_lstm_lowb_loss_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='lowb-lossAll':
+            mse, predict_price_list = new_rnn.atten_lstm_lowb_lossAll_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         
         mse_record.append(mse)
         predict_record.append(list(predict_price_list))
@@ -353,7 +356,7 @@ def dynamic_target_newbl(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,mark
         if lstm_type=='lstm':
             mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-lstm':
-            mse, predict_price = new_rnn.atten_lstm_corr(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+            mse, predict_price = new_rnn.atten_lstm_lowb_loss_bl(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-ecm':
             mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
@@ -441,10 +444,10 @@ if __name__ == '__main__':
     filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
     fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
 
-    #allocate_weight = 'mvp'
-    #lstm_type = 'lowb'
-    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
-    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+    # allocate_weight = 'mvp'
+    # lstm_type = 'lowb'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-mvp/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-mvp/' # 存lstm預測績效圖
 
     #allocate_weight = 'mvp'
     #lstm_type = 'loss'
@@ -453,12 +456,17 @@ if __name__ == '__main__':
 
     #allocate_weight = 'mvp'
     #lstm_type = 'lowb-loss'
-    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
-    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-loss-mvp/' # 存組合答案
+    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-loss-mvp/' # 存lstm預測績效圖
+
+    # allocate_weight = 'mvp'
+    # lstm_type = 'lowb-lossAll'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-lossAll-mvp/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-lossAll-mvp/' # 存lstm預測績效圖
 
     batch_size = 90
     hidden_layer = 64
-    epochs = 10
+    epochs = 50
     # window_size = 21
     window_size_x = 63
     window_size_y = 21

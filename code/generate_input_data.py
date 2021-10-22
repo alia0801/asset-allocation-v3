@@ -6,6 +6,7 @@ import clustering_type
 import pandas as pd
 import math
 import statistics
+import numpy as np
 # %%
 def generate_group(cluster,y,month,nnnn,number,market_etf,db_name,list_etf):
     if cluster=='type':
@@ -155,6 +156,8 @@ def generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf):
         volatilitys.append(vol)
         every_close_finalday.append(tmp)
         # break
+    df_close = pd.DataFrame(closes)
+    df_close.T.to_csv('close.csv',index=False,header=False)
     return closes,volumes,volatilitys,groups,number,every_close_finalday
 
 # %%
@@ -286,24 +289,29 @@ def generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,grou
         volatilitys.append(vol)
         every_close_finalday.append(tmp)
         # break
+    df_close = pd.DataFrame(closes)
+    df_close.T.to_csv('close.csv',index=False,header=False)
     return closes,volumes,volatilitys,groups,number,every_close_finalday
 
 # %%
 if __name__ == '__main__':
     db_name = 'my_etf'
-    list_etf = ['TW_etf']
-    # list_etf = ['US_etf']
+    # list_etf = ['TW_etf']
+    list_etf = ['US_etf']
     (y,nnnn,month) = (2018,1,6) # 2018/1/1~2018/12/31
-    market_etf = '006204.TW'
-    # market_etf = 'SPY'
+    # market_etf = '006204.TW'
+    market_etf = 'SPY'
 
-    number = 3
+    number = 5
     # cluster = 'type'
     cluster = 'corr'
-    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
-    train_closes,train_volumes,train_volatilitys = generate_training_data(y,month,db_name,groups,number)
-
-    # df_close = pd.DataFrame(closes)
+    groups = [['SPY'],['ITOT'], ['VEU'] ,['VNQ'] ,['AGG']]
+    closes,volumes,volatilitys,groups,number,every_close_finalday = generate_data_d(y,nnnn,month,db_name,cluster,number,market_etf,list_etf,groups)
+    # closes,volumes,volatilitys,groups,number,every_close_finalday = generate_data(y,nnnn,month,db_name,cluster,number,market_etf,list_etf)
+    # train_closes,train_volumes,train_volatilitys = generate_training_data(y,month,db_name,groups,number)
+    print(np.array(closes).shape)
+    df_close = pd.DataFrame(closes)
+    df_close.T.to_csv('close.csv',index=False,header=False)
     # df_volumes = pd.DataFrame(volumes)
     # df_vol = pd.DataFrame(volatilitys)
 

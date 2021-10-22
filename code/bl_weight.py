@@ -8,7 +8,21 @@ import pymysql
 import datetime
 import price2matrix
 import generate_input_data
+import matlab.engine
 # %%
+
+def get_bl_weight_by_matlab(Q,P,omega):
+    q_df = pd.DataFrame(Q)
+    p_df = pd.DataFrame(P)
+    o_df = pd.DataFrame(omega)
+    q_df.to_csv('matrix_q.csv',index=False,header=False)
+    p_df.to_csv('matrix_p.csv',index=False,header=False)
+    o_df.to_csv('matrix_omega.csv',index=False,header=False)
+    eng = matlab.engine.start_matlab()
+    ans = eng.bl()
+    weights = np.round(np.array(ans).reshape(len(ans)),5)
+    return weights
+
 def get_market_price(db_name,date1,date2,market_etf):
     # db_name = 'my_etf'
     db = pymysql.connect(host="localhost", user="root", password="esfortest", database=str(db_name))
