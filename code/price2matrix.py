@@ -6,6 +6,73 @@ import generate_input_data
 import bl_weight
 
 # %%
+def generate_matrix_new(closes,number,price_pred,probibility):
+    closes = np.array(closes)
+    cov_matrix = np.corrcoef(closes[1:])
+    price_now = []
+    for i in range(1,number):
+        if closes[i][0]!=0:
+            price_now.append(closes[i][0])
+        else:
+            flag = 0
+            for j in range(1,len(closes[i])):
+                if closes[i][j]!=0:
+                    price_now.append(closes[i][j])
+                    flag = 1
+                    break
+            if flag==0:
+                price_now.append(0.0001)
+    price_now = np.array(price_now)
+    
+    price_change = []
+    for i in range(number-1):
+        tmp = []
+        for j in range(3):
+            ch = (price_pred[i][j]-price_now[i])/price_now[i]
+            tmp.append(ch)
+        price_change.append(tmp)
+    price_change = np.array(price_change)
+    confid = np.array(probibility).reshape((number-1)*3)
+    # print(price_change.shape,confid.shape)
+    print(price_change)
+    print(confid)
+    
+    Q = []
+    P = []
+    omega = []
+    for i in range(number-1):
+        for k in range(3):
+            Q.append(price_change[i][k])
+            tmp = []
+            for j in range(number-1):
+                if j==i:
+                    tmp.append(1)
+                else:
+                    tmp.append(0)
+            P.append(tmp)
+
+    
+    for i in range((number-1)*3):
+        tmp_o = []
+        for j in range((number-1)*3):
+            if i==j:
+                if confid[i]!=0:
+                    tmp_o.append(confid[i])
+                else:
+                    tmp_o.append(0.01)
+            else:
+                tmp_o.append(0)
+        omega.append(tmp_o)    
+        
+    Q = np.array(Q).reshape(-1, 1)
+    P = np.array(P)
+    omega = np.array(omega)
+    print(P)
+    print(Q)
+    print(omega)
+    # print(P.shape,Q.shape,omega.shape)
+    return P, Q, omega, cov_matrix
+
 
 def generate_matrix(closes,number,price_pred,mse_record):
     # price_pred = np.array([83,30,13,12])

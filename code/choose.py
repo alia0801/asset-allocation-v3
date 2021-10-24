@@ -217,24 +217,25 @@ def dynamic_target(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market_etf
         if lstm_type=='lstm':
             mse, predict_price = new_rnn.lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-lstm':
-            mse, predict_price = new_rnn.atten_lstm_lowb_loss_bl(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+            # mse, predict_price = new_rnn.atten_lstm_lowb_loss_bl(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+            probs, predict_price = new_rnn.atten_lstm_lowb_loss_blNewVeiw(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='atten-ecm':
             mse, predict_price = new_rnn.atten_ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         else:
             mse, predict_price = new_rnn.ecm_lstm(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
-        mse_record.append(mse)
+        mse_record.append(probs)
         predict_record.append(predict_price)
+        print('predict_price',predict_record)
+        print('mse_record',mse_record)
     
-    predict_record = np.array(predict_record)
-    mse_record = np.array(mse_record)
+    # predict_record = np.array(predict_record)
+    # mse_record = np.array(mse_record)
 
-    # predict_record = np.array([83,30,13,12])
-    # mse_record = np.array([0.1,0.15,0.13,0.12])
-    # print('predict_record',predict_record)
-    print('predict_price',predict_record)
-    print('mse_record',mse_record)
+    # print('predict_price',predict_record)
+    # print('mse_record',mse_record)
 
-    P, Q, omega, cov_matrix = price2matrix.generate_matrix(closes,number,predict_record,mse_record)
+    P, Q, omega, cov_matrix = price2matrix.generate_matrix_new(closes,number,predict_record,mse_record)
+    # P, Q, omega, cov_matrix = price2matrix.generate_matrix(closes,number,predict_record,mse_record)
     # print('P',P)
     # print('Q',Q)
     # print('omega',omega)
@@ -295,6 +296,8 @@ def dynamic_target_mvp(lstm_filepath,groups,db_name,list_etf,y,nnnn,month,market
             mse, predict_price_list = new_rnn.atten_lstm_lowb_loss_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         elif lstm_type=='lowb-lossAll':
             mse, predict_price_list = new_rnn.atten_lstm_lowb_lossAll_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
+        elif lstm_type=='lowb-loss-market':
+            mse, predict_price_list = new_rnn.atten_lstm_lowb_loss_market_mvp(batch_size,hidden_layer,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath)
         
         mse_record.append(mse)
         predict_record.append(list(predict_price_list))
@@ -439,10 +442,10 @@ if __name__ == '__main__':
     # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/atten-ecm-simple/' # 存組合答案
     # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/atten-ecm-simple/' # 存lstm預測績效圖
 
-    allocate_weight = 'bl'
-    lstm_type = 'atten-lstm'
-    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
-    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
+    # allocate_weight = 'bl'
+    # lstm_type = 'atten-lstm'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
 
     # allocate_weight = 'mvp'
     # lstm_type = 'lowb'
@@ -454,10 +457,17 @@ if __name__ == '__main__':
     #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/test/' # 存組合答案
     #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/test/' # 存lstm預測績效圖
 
-    #allocate_weight = 'mvp'
-    #lstm_type = 'lowb-loss'
-    #filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-loss-mvp/' # 存組合答案
-    #fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-loss-mvp/' # 存lstm預測績效圖
+    # allocate_weight = 'mvp'
+    # lstm_type = 'lowb-loss'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-loss-mvp/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-loss-mvp/' # 存lstm預測績效圖
+
+    allocate_weight = 'mvp'
+    lstm_type = 'lowb-loss-market'
+    # filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-loss-market-mvp/' # 存組合答案
+    # fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-loss-market-mvp/' # 存lstm預測績效圖
+    filepath = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/attLSTM-lowb-loss-market-future-mvp/' # 存組合答案
+    fig_filepath = 'D:/Alia/Documents/asset allocation/output/predict fig/fix comb/attLSTM-lowb-loss-market-future-mvp/' # 存lstm預測績效圖
 
     # allocate_weight = 'mvp'
     # lstm_type = 'lowb-lossAll'

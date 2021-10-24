@@ -88,6 +88,31 @@ def window_data_corr(data,data2,data3,data4, window_size_x,window_size_y):
       X.append(raw)
     return X, y, y2
 
+def window_data_market(data,data2,data3,data4, window_size_x,window_size_y):
+    X_tmp = []
+    y = []
+    y2=[]
+    i = 0
+    while (i+window_size_x+window_size_y) < len(data):
+        X_tmp.append( [ data[ i: i+window_size_x ], data2[ i: i+window_size_x ], data3[ i: i+window_size_x ],  data4[ i+window_size_y: i+window_size_x+window_size_y ]])
+        # X_tmp.append( [ data[ i: i+window_size_x ], data2[ i: i+window_size_x ], data3[ i: i+window_size_x ],  data4[ i: i+window_size_x ]])
+        y.append(data[ i+window_size_x+window_size_y ])     
+        y2.append(data4[ i+window_size_x+window_size_y ])     
+        i += 1
+    assert len(X_tmp) ==  len(y)
+    X = []
+    for i in range(len(X_tmp)):
+      raw0 = X_tmp[i][0]
+      raw1 = X_tmp[i][1]
+      raw2 = X_tmp[i][2]
+      raw = []
+      for j in range(len(X_tmp[i][0])):
+        # print([ raw0[j][0], raw1[j][0], raw2[j][0] ])
+        raw.append( [ raw0[j][0], raw1[j][0], raw2[j][0] ] )
+        # raw.append(  raw0[j]  )
+      X.append(raw)
+    return X, y, y2
+
 def find_new_center(input_point,center,new_r):
     # print('input_point:',input_point)
     # print('center:', center)
@@ -352,6 +377,26 @@ class Attention_lstm(keras.Model):
         out = self.out(x)
         return out
 
+class Attention_lstm_4feature(keras.Model):
+    def __init__(self,units):
+        super(Attention_lstm_4feature, self).__init__()
+        self.lstm_en = layers.RNN( keras.layers.LSTMCell(units,dropout=0.2), input_shape=(21,4), return_sequences=True,unroll=True)
+        # self.lstm_de = layers.RNN( keras.layers.LSTMCell(units,dropout=0.2), input_shape=(21,3), return_sequences=True,unroll=True)
+        self.lstm_de = layers.SimpleRNN(units,dropout=0.2,unroll=True)
+        self.attention = layers.Attention()
+        self.fc = layers.Dense(32)
+        self.out = layers.Dense(1)
+    def call(self, inputs, training=None):
+        x = self.lstm_en(inputs)
+        # x = self.attention([inputs, inputs])
+        # x = self.lstm_en(x)
+        x = self.attention([x, x])
+        x = self.lstm_de(x)
+        # x = self.attention([x, x])
+        x = self.fc(x)
+        out = self.out(x)
+        return out
+
 class Attention_lstm_pred1m(keras.Model):
     def __init__(self,units):
         super(Attention_lstm_pred1m, self).__init__()
@@ -386,7 +431,7 @@ def get_interval(y_train,pred_train):
     #y_lower = y_pred + q_bootstrap[0].mean()
     #y_upper = y_pred + q_bootstrap[1].mean()
 
-    return lower_bound,upper_bound
+    return lower_bound,upper_bound,res
 
 # %%
 def lstm(batchsz,units,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath):
@@ -888,7 +933,7 @@ def atten_lstm_lowb_loss_bl(batchsz,units,epochs,window_size_x,window_size_y,dat
 
     pred_train = np.array(y_pred_list_train)
     correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
-    low_b,up_b = get_interval(correct_y,pred_train)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
 
     y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
     y_cal_mse = y[:len(y_model_cal)]
@@ -966,6 +1011,235 @@ def atten_lstm_lowb_loss_bl(batchsz,units,epochs,window_size_x,window_size_y,dat
     plt.close()
     
     return test_mse, adj_close
+
+# 下界+loss+blNewVeiw
+def atten_lstm_lowb_loss_blNewVeiw(batchsz,units,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath):
+    print('prepare data...')
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data_to_use[0].reshape(-1, 1))
+    scaled_volume = scaler.fit_transform(data_to_use[1].reshape(-1, 1))
+    scaled_volat = scaler.fit_transform(data_to_use[2].reshape(-1, 1))
+    scaled_market = scaler.fit_transform(data_to_use[3].reshape(-1, 1))
+    corr2market = Series(scaled_data.flatten()).corr(Series(scaled_market.flatten()))
+    print('corr2market=',corr2market)
+    X, y, y_market = window_data_corr(scaled_data, scaled_volume, scaled_volat,scaled_market, window_size_x,window_size_y)
+
+    X_train_all = []
+    y_train_all = []
+    models = []
+    X_test = []
+    y_test = []
+
+    while len(X_test) < batchsz:
+        X_test += X[540:]
+        y_test += y[540:]
+        
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+
+    data_test = tf.data.Dataset.from_tensor_slices((X_test,y_test))
+    data_test = data_test.batch(batchsz,drop_remainder=True)
+
+    print('X_test.shape',X_test.shape)
+    print('y_test.shape',y_test.shape)
+
+    data_test = tf.data.Dataset.from_tensor_slices((X_test,y_test))
+    data_test = data_test.batch(batchsz,drop_remainder=True)
+    
+    print('create train model...')
+
+    def innerLoss(y_true,y_pred, cut):
+
+        loss1= tf.reduce_mean(tf.square(y_true-y_pred))
+        market_data = tf.convert_to_tensor(np.array(y_market[batchsz*cut:batchsz*(cut+1)]).astype(np.float32))
+        corr = tfp.stats.correlation(market_data, y_pred, sample_axis=0, event_axis=None)
+        loss2 = abs(corr-corr2market)
+        return 0.5*loss1 + 0.5*loss2
+
+    def costum_loss(cut):
+        def inner(y_true, y_pred):
+            return innerLoss(y_true,y_pred, cut)
+        return inner
+
+    for cut in range(0,int(540/batchsz)):
+        X_train = np.array(X[cut*batchsz:(cut+1)*batchsz]) #(batchsz,21,3)
+        y_train = np.array(y[cut*batchsz:(cut+1)*batchsz]) #(batchsz,1)
+
+        X_train_all.append(X_train)
+        y_train_all.append(y_train)
+        data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
+        data = data.batch(batchsz,drop_remainder=True)
+        data_iter = iter(data)
+        samples = next(data_iter)
+
+        rnn_model = Attention_lstm(units)
+        rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss=costum_loss(cut=cut),metrics=['mse'])
+        rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+
+        if cut==0:
+            rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss=costum_loss(cut=cut),metrics=['mse'])
+            rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+            rnn_model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+            models.append(rnn_model)
+        else:
+            rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
+            rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+            models.append(rnn_model)
+        print('len(models):',len(models))
+
+    y_pred_train_all=[]
+    print('training!!!')
+    for i in range(epochs+1):
+        print("---------------------epoch:",i,"---------------------------")
+        model_count = 0
+        for model in models:
+            # print(model_count)
+            # model = tf.keras.models.load_model(model_path+model_name)
+            X_train = X_train_all[model_count] #(batchsz,21,3)
+            y_train = y_train_all[model_count] #(batchsz,1)
+            data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
+            data = data.batch(batchsz,drop_remainder=True)
+            data_iter = iter(data)
+            samples = next(data_iter)
+            if i < epochs: #train
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+                model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+                model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+            else: #predict train data
+                if model_count==0:
+                    print('calculate performance...')
+                print('model',model_count)
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+                y_pred_train = model.predict(X_train)
+                y_pred_train_all.append(y_pred_train)
+            model_count+=1
+
+    rnn_model = models[0]
+    rnn_model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+    y_pred_test = rnn_model.predict(X_test)
+
+    y_pred_list_train = []
+    y_pred_list_test = []
+    for i in range(len(y_pred_train_all)):
+        for j in range(len(y_pred_train_all[0])):
+            y_pred_list_train.append(y_pred_train_all[i][j][0])
+            y_pred_list_test.append(None)
+    for i in range(len(y_pred_test)):
+        y_pred_list_test.append(y_pred_test[i][0])
+
+    pred_train = np.array(y_pred_list_train)
+    correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
+
+    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
+    y_cal_mse = y[:len(y_model_cal)]
+    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
+    mse_str1 = 'total mse ='+ str(total_mse)
+    print('total mse =', total_mse)
+    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
+    print('test mse =', test_mse)
+    mse_str2 = 'test mse ='+ str(test_mse)
+    bound_str = 'upper bound = '+str(round(up_b,5))+', lower bound = '+str(round(low_b,5))
+    print(bound_str)
+
+    upper_bound = []
+    lower_bound = []
+    for i in range(len(y_pred_test)):
+        upper_bound.append(y_pred_test[i][0]+up_b)
+        lower_bound.append(y_pred_test[i][0]+low_b)
+
+    print('start predict...')
+    scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
+    scaled_volume_1m = scaler.fit_transform(data_a_month[1].reshape(-1, 1))
+    scaled_vola_1m = scaler.fit_transform(data_a_month[2].reshape(-1, 1))
+
+    X_tmp = [scaled_close_1m,scaled_volume_1m,scaled_vola_1m]
+    X_1m = []
+    for i in range(len(scaled_close_1m)):
+        raw0 = X_tmp[0][i]
+        raw1 = X_tmp[1][i]
+        raw2 = X_tmp[2][i]
+        raw = [ raw0[0], raw1[0], raw2[0]]
+        X_1m.append(raw)
+    X_1m = np.array(X_1m)
+
+    X_1m_run = []
+    for i in range(batchsz):
+        X_1m_run.append(X_1m)
+    X_1m_run = np.array(X_1m_run)  
+
+    
+    y_pred_ans = rnn_model.predict(X_1m_run)
+    predict_y = y_pred_ans[0][0]
+    # print(predict_y)
+
+    del rnn_model
+    gc.collect()
+
+    # 轉回原來數值
+    # y = (x – 平均值) / 標準偏差--> x =y*stdev+mean
+    # mean = np.sum(data_a_month[0])/len(data_a_month[0])
+    mean = np.mean(data_a_month[0])
+    std = statistics.stdev(data_a_month[0])
+    # predict_close = (predict_y*std+mean)
+    # adj_close = ((predict_y+low_b)*std+mean)
+    prob,prices = get_interval_probibility(low_b,up_b,res,mean,std,predict_y)
+
+    # print("predict_price:",predict_close)
+    pred_str = "predict_price:"+str(prices[1])
+    
+    print('plot...')
+    fig_y_min = -5
+    fig_y_max = 5
+    test_x = np.linspace(len(y_pred_list_train),len(y_pred_list_test)-1,num=(len(y_pred_list_test)-len(y_pred_list_train)))
+    plt.plot(y, label='Original data')
+    plt.plot(y_pred_list_train, label='Training data')
+    plt.plot(y_pred_list_test, label='Testing data')
+    plt.fill_between(test_x,upper_bound,lower_bound,color='pink')
+    plt.ylim([fig_y_min,fig_y_max])
+    plt.text(0,4.5,mse_str1)
+    plt.text(0,4,mse_str2)
+    plt.text(0,3.5,pred_str)
+    plt.text(0,3,bound_str)
+    plt.legend(loc="lower right")
+    plt.savefig(lstm_filepath+filename)
+    # plt.show()
+    plt.clf()
+    plt.close()
+    
+    
+    return prob,prices
+
+def get_interval_probibility(low_b,up_b,res,mean,std,price):
+
+    h_price = price + up_b
+    l_price = price + low_b
+
+    count_m = 0
+    count_l = 0
+    count_h = 0
+
+    for i in res:
+        if i < up_b+0.1 and i > up_b-0.1:
+            count_h+=1
+        elif i < low_b+0.1 and i > low_b-0.1:
+            count_l+=1
+        elif i < 0.1 and i > -0.1:
+            count_m+=1
+    h_prob = count_h/len(res)
+    m_prob = count_m/len(res)
+    l_prob = count_l/len(res)
+
+    h_price = (h_price*std+mean)
+    m_price = (price*std+mean)
+    l_price = (l_price*std+mean)
+
+    prob = [h_prob,m_prob,l_prob]
+    prices = [h_price,m_price,l_price]
+
+    # print(prob,prices)
+
+    return prob,prices
 
 # %%
 # 下界+loss+mvp
@@ -1094,7 +1368,7 @@ def atten_lstm_lowb_loss_mvp(batchsz,units,epochs,window_size_x,window_size_y,da
 
     pred_train = np.array(y_pred_list_train)
     correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
-    low_b,up_b = get_interval(correct_y,pred_train)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
 
     y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
     y_cal_mse = y[:len(y_model_cal)]
@@ -1256,7 +1530,7 @@ def atten_lstm_lowb_lossAll_mvp(batchsz,units,epochs,window_size_x,window_size_y
     pred_train = np.array(y_pred_list_train)
     correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
     #print(pred_train.shape,correct_y.shape)
-    low_b,up_b = get_interval(correct_y,pred_train)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
 
     y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
     y_cal_mse = y[:len(y_model_cal)]
@@ -1528,6 +1802,214 @@ def atten_lstm_loss_mvp(batchsz,units,epochs,window_size_x,window_size_y,data_to
     plt.close()
     
     return test_mse, predict_close.reshape(1, -1).tolist()[0]
+# %%
+# 下界+loss+mvp
+def atten_lstm_lowb_loss_market_mvp(batchsz,units,epochs,window_size_x,window_size_y,data_to_use,data_a_month,filename,lstm_filepath):
+    print('prepare data...')
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data_to_use[0].reshape(-1, 1))
+    scaled_volume = scaler.fit_transform(data_to_use[1].reshape(-1, 1))
+    scaled_volat = scaler.fit_transform(data_to_use[2].reshape(-1, 1))
+    scaled_market = scaler.fit_transform(data_to_use[3].reshape(-1, 1))
+    corr2market = Series(scaled_data.flatten()).corr(Series(scaled_market.flatten()))
+    print('corr2market=',corr2market)
+    X, y, y_market = window_data_market(scaled_data, scaled_volume, scaled_volat,scaled_market, window_size_x,window_size_y)
+
+    X_train_all = []
+    y_train_all = []
+    models = []
+    X_test = []
+    y_test = []
+
+    while len(X_test) < batchsz:
+        X_test += X[540:]
+        y_test += y[540:]
+        
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+
+    data_test = tf.data.Dataset.from_tensor_slices((X_test,y_test))
+    data_test = data_test.batch(batchsz,drop_remainder=True)
+
+    print('X_test.shape',X_test.shape)
+    print('y_test.shape',y_test.shape)
+
+    data_test = tf.data.Dataset.from_tensor_slices((X_test,y_test))
+    data_test = data_test.batch(batchsz,drop_remainder=True)
+    
+    print('create train model...')
+
+    def innerLoss(y_true,y_pred, cut):
+
+        loss1= tf.reduce_mean(tf.square(y_true-y_pred))
+        market_data = tf.convert_to_tensor(np.array(y_market[batchsz*cut:batchsz*(cut+1)]).astype(np.float32))
+        corr = tfp.stats.correlation(market_data, y_pred, sample_axis=0, event_axis=None)
+        loss2 = abs(corr-corr2market)
+        return 0.5*loss1 + 0.5*loss2
+
+    def costum_loss(cut):
+        def inner(y_true, y_pred):
+            return innerLoss(y_true,y_pred, cut)
+        return inner
+
+    for cut in range(0,int(540/batchsz)):
+        X_train = np.array(X[cut*batchsz:(cut+1)*batchsz]) #(batchsz,21,3)
+        y_train = np.array(y[cut*batchsz:(cut+1)*batchsz]) #(batchsz,1)
+
+        X_train_all.append(X_train)
+        y_train_all.append(y_train)
+        data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
+        data = data.batch(batchsz,drop_remainder=True)
+        data_iter = iter(data)
+        samples = next(data_iter)
+
+        rnn_model = Attention_lstm_4feature(units)
+        rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss=costum_loss(cut=cut),metrics=['mse'])
+        rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+
+        if cut==0:
+            rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss=costum_loss(cut=cut),metrics=['mse'])
+            rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+            rnn_model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+            models.append(rnn_model)
+        else:
+            rnn_model.compile(optimizer  =keras.optimizers.Adam(),loss="mse",metrics=['mse'])
+            rnn_model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+            models.append(rnn_model)
+        print('len(models):',len(models))
+
+    y_pred_train_all=[]
+    print('training!!!')
+    for i in range(epochs+1):
+        print("---------------------epoch:",i,"---------------------------")
+        model_count = 0
+        for model in models:
+            # print(model_count)
+            # model = tf.keras.models.load_model(model_path+model_name)
+            X_train = X_train_all[model_count] #(batchsz,21,3)
+            y_train = y_train_all[model_count] #(batchsz,1)
+            data = tf.data.Dataset.from_tensor_slices((X_train,y_train))
+            data = data.batch(batchsz,drop_remainder=True)
+            data_iter = iter(data)
+            samples = next(data_iter)
+            if i < epochs: #train
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+                model.fit(data,epochs=1, validation_data = data_test,shuffle=True)
+                model.save_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+            else: #predict train data
+                if model_count==0:
+                    print('calculate performance...')
+                print('model',model_count)
+                model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+                y_pred_train = model.predict(X_train)
+                y_pred_train_all.append(y_pred_train)
+            model_count+=1
+
+    rnn_model = models[0]
+    rnn_model.load_weights('D:/Alia/Documents/asset allocation/asset-allocation-v3/models/weights.h5')
+    y_pred_test = rnn_model.predict(X_test)
+
+    y_pred_list_train = []
+    y_pred_list_test = []
+    for i in range(len(y_pred_train_all)):
+        for j in range(len(y_pred_train_all[0])):
+            y_pred_list_train.append(y_pred_train_all[i][j][0])
+            y_pred_list_test.append(None)
+    for i in range(len(y_pred_test)):
+        y_pred_list_test.append(y_pred_test[i][0])
+
+    pred_train = np.array(y_pred_list_train)
+    correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
+
+    y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
+    y_cal_mse = y[:len(y_model_cal)]
+    total_mse = np.sqrt( ( ( np.array(y_model_cal) - np.array(y_cal_mse) ) ** 2).mean() )
+    mse_str1 = 'total mse ='+ str(total_mse)
+    print('total mse =', total_mse)
+    test_mse = np.sqrt( ( ( np.array( y_model_cal[len(y_pred_list_train):] ) - np.array( y_cal_mse[len(y_pred_list_train):] ) ) ** 2).mean() )
+    print('test mse =', test_mse)
+    mse_str2 = 'test mse ='+ str(test_mse)
+    bound_str = 'upper bound = '+str(round(up_b,5))+', lower bound = '+str(round(low_b,5))
+    print(bound_str)
+
+    upper_bound = []
+    lower_bound = []
+    for i in range(len(y_pred_test)):
+        upper_bound.append(y_pred_test[i][0]+up_b)
+        lower_bound.append(y_pred_test[i][0]+low_b)
+        
+
+    print('start predict...')
+    # scaled_close_1m = scaler.fit_transform(data_a_month[0].reshape(-1, 1))
+    # scaled_volume_1m = scaler.fit_transform(data_a_month[1].reshape(-1, 1))
+    # scaled_vola_1m = scaler.fit_transform(data_a_month[2].reshape(-1, 1))
+
+    X_tmp = [scaled_data[:-(window_size_x+window_size_y)],scaled_volume[:-(window_size_x+window_size_y)],scaled_volat[:-(window_size_x+window_size_y)]]
+    final_pred_x = []
+
+    for j in range(21):
+        X_1m=[]
+        for i in range(window_size_x):
+            raw0 = X_tmp[0][i+j]
+            raw1 = X_tmp[1][i+j]
+            raw2 = X_tmp[2][i+j]
+            raw = [ raw0[0], raw1[0], raw2[0]]
+            X_1m.append(raw)
+        final_pred_x.append(X_1m)
+    final_pred_x = np.array(final_pred_x)
+    print('final_pred_x.shape',final_pred_x.shape)
+
+    # X_1m_run = []
+    # for i in range(batchsz):
+    #     X_1m_run.append(X_1m)
+    # X_1m_run = np.array(X_1m_run)  
+
+    # final_pred_x = np.array(X[-21:])
+
+    
+    y_pred_ans = rnn_model.predict(final_pred_x)
+    # print(y_pred_ans)
+    # predict_y = y_pred_ans[0][0]
+    # print(predict_y)
+
+    del rnn_model
+    gc.collect()
+
+    # 轉回原來數值
+    # y = (x – 平均值) / 標準偏差--> x =y*stdev+mean
+    # mean = np.sum(data_a_month[0])/len(data_a_month[0])
+    mean = np.mean(data_to_use[0])
+    std = statistics.stdev(data_to_use[0])
+    predict_close = (y_pred_ans*std+mean)
+    adj_close = ((y_pred_ans+low_b)*std+mean)
+    print(adj_close)
+
+    print("predict_price:",adj_close[0][-1])
+    pred_str = "predict_price:"+str(adj_close[0][-1])
+    
+    print('plot...')
+    fig_y_min = -5
+    fig_y_max = 5
+    test_x = np.linspace(len(y_pred_list_train),len(y_pred_list_test)-1,num=(len(y_pred_list_test)-len(y_pred_list_train)))
+    plt.plot(y, label='Original data')
+    plt.plot(y_market, label='Market data')
+    plt.plot(y_pred_list_train, label='Training data')
+    plt.plot(y_pred_list_test, label='Testing data')
+    plt.fill_between(test_x,upper_bound,lower_bound,color='pink')
+    plt.ylim([fig_y_min,fig_y_max])
+    plt.text(0,4.5,mse_str1)
+    plt.text(0,4,mse_str2)
+    plt.text(0,3.5,pred_str)
+    plt.text(0,3,bound_str)
+    plt.legend(loc="lower right")
+    plt.savefig(lstm_filepath+filename)
+    # plt.show()
+    plt.clf()
+    plt.close()
+    
+    return test_mse, predict_close.reshape(1, -1).tolist()[0]
+
 
 # %%
 # 下界+mvp
@@ -1584,7 +2066,7 @@ def atten_lstm_lowb_mvp(batchsz,units,epochs,window_size_x,window_size_y,data_to
     pred_train = np.array(y_pred_list_train)
     correct_y = np.array(y[:len(y_pred_list_train)]).reshape(-1)
     #print(pred_train.shape,correct_y.shape)
-    low_b,up_b = get_interval(correct_y,pred_train)
+    low_b,up_b,res = get_interval(correct_y,pred_train)
 
     y_model_cal = y_pred_list_train+y_pred_list_test[len(y_pred_list_train):]
     y_cal_mse = y[:len(y_model_cal)]

@@ -637,12 +637,13 @@ if __name__ == '__main__':
     # market = 'tw'
 ##################### 批次處理 ######################
  
-    paths = ['us-market','us-classic','atten-lstm-corr-new','us-lstm','us-hw','mvp-3m','mvtp-3m','us-ew']
+    paths = ['us-market','us-classic','atten-lstm-corr-new','attLSTM-lowb-mvp','attLSTM-lowb-loss-mvp','attLSTM-lowb-lossAll-mvp']
+    # paths = ['us-market','us-classic','atten-lstm-corr-new','us-lstm','us-hw','mvp-3m','mvtp-3m','us-ew']
     # paths = ['us-market','us-classic','atten-lstm-corr-new','atten-lstm-mvp3m','atten-lstm-mvp3mtrue']
     # paths = ['us-market','us-classic','atten-lstm-corr-new']
     # paths = ['us-maxreward','us-maxSharpe']
-    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/0927/test/'
-    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/0927/train/'
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/1024/test/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/1024/train/'
     ans_path = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/'
     # allFileName = os.listdir(ans_path+paths[0]+'/')
     allFileName = ['ans-us-2015-1.csv','ans-us-2016-1.csv']
@@ -675,7 +676,7 @@ if __name__ == '__main__':
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = ['Market','Classic','New LSTM','LSTM','Holt-Winters','MVP','MVTP','Equal Weight']
+        labels = ['Market','Classic','Last Method','New LSTM+Interval','New LSTM+Interval+Loss','New LSTM+Interval+Loss_peep']
         # labels = ['Market','Classic','passed','pred lower','pred true']
         # labels = ['csv-market','csv-classic','New LSTM']
         
