@@ -485,8 +485,9 @@ def calculate_combs(y,month,market,first_input_total,ans,ans_new):
 
 def plot_money_sim(filepath,final_input_money,record_comb_moneysim,compared_combs,labels):
     
-    fig_y_min = 50000
-    fig_y_max = 300000
+    fig_y_min = 125000
+    # fig_y_min = 50000
+    fig_y_max = 280000
 
     plt.plot(final_input_money, color='red',label='input')
 
@@ -535,6 +536,8 @@ def plot_ann_reward(filepath,final_input_money,record_comb_moneysim,compared_com
 
     fig_y_min = -0.5
     fig_y_max = 0.5
+    # fig_y_min = -0.4
+    # fig_y_max = 0.2
 
     # for i in range(len(compared_combs)):
     #     comb = compared_combs[i]
@@ -637,13 +640,13 @@ if __name__ == '__main__':
     # market = 'tw'
 ##################### 批次處理 ######################
  
-    paths = ['us-market','us-classic','atten-lstm-corr-new','attLSTM-lowb-mvp','attLSTM-lowb-loss-mvp','attLSTM-lowb-lossAll-mvp']
+    paths = ['us-classic','atten-lstm-corr-new','attLSTM-lowb-mvp','attLSTM-lowb-loss-mvp','attLSTM-lowb-loss-market-mvp','attLSTM-lowb-loss-market-future-mvp']
     # paths = ['us-market','us-classic','atten-lstm-corr-new','us-lstm','us-hw','mvp-3m','mvtp-3m','us-ew']
     # paths = ['us-market','us-classic','atten-lstm-corr-new','atten-lstm-mvp3m','atten-lstm-mvp3mtrue']
     # paths = ['us-market','us-classic','atten-lstm-corr-new']
     # paths = ['us-maxreward','us-maxSharpe']
-    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/1024/test/'
-    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/1024/train/'
+    filepath_test = 'D:/Alia/Documents/asset allocation/output/performance/1027/test-nomarket/'
+    filepath_train = 'D:/Alia/Documents/asset allocation/output/performance/1027/train/'
     ans_path = 'D:/Alia/Documents/asset allocation/output/answer/fix comb/'
     # allFileName = os.listdir(ans_path+paths[0]+'/')
     allFileName = ['ans-us-2015-1.csv','ans-us-2016-1.csv']
@@ -676,7 +679,7 @@ if __name__ == '__main__':
         for i in range(len(record_comb_moneysim)):
             final_sum_money = record_comb_moneysim[i]
             record_comb_moneysim[i] = final_sum_money[:len(final_input_money)]
-        labels = ['Market','Classic','Last Method','New LSTM+Interval','New LSTM+Interval+Loss','New LSTM+Interval+Loss_peep']
+        labels = ['Classic','Last Method','New LSTM+Interval','New LSTM+Interval+Loss','New LSTM+Interval+Loss+Market Data','New LSTM+Interval+Loss+Future Market Data']
         # labels = ['Market','Classic','passed','pred lower','pred true']
         # labels = ['csv-market','csv-classic','New LSTM']
         
